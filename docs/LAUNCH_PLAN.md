@@ -1,5 +1,7 @@
 # Launch plan: "The Christmas pre-sale test"
 
+> **Start here (added 14 Oct):** before the shop is online you can already share the **showcase page**, a private claude.ai page with a free chart-wheel tool, real sample pages and a sample download: https://claude.ai/artifact/VLYVz9jLuJ4ExR9CWAAE6V. Open its Share menu to choose who can see it. Use it for the "friends" step and early feedback. It can't take orders or sign-ups; that needs the real site (`docs/DEPLOY.md`). Ready-to-post copy is in `docs/MARKETING_CONTENT.md`.
+
 **Goal:** find out, cheaply and fast, whether strangers will pay $29 for a personalized birth-chart book.
 **Kill rule:** after ~1,000 targeted visitors, fewer than 5 paid orders means stop or change the angle (see `FORECAST.md`).
 **Budget:** close to $0 in ads. The cost is your time: about 5-7 hours a week for 7 weeks.

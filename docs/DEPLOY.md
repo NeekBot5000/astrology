@@ -27,8 +27,9 @@ The site is packaged as a **Docker image** (a sealed box containing the code and
    - Leave `STRIPE_SECRET_KEY` empty at first: the site then runs in **"reserve a copy"** mode (collects emails, takes no money). Good for a first look.
 4. **Turn on payments.** In Stripe, copy the secret key (starts `sk_live_`, or `sk_test_` to practise) into `STRIPE_SECRET_KEY`. Then in Stripe → Developers → Webhooks → add endpoint `https://YOUR-DOMAIN/stripe/webhook`, choose the events `checkout.session.completed` and `checkout.session.async_payment_succeeded`, and copy its signing secret into `STRIPE_WEBHOOK_SECRET`.
 5. **Connect the domain.** Render → Settings → Custom domain, then add the DNS record it shows at your domain registrar.
-6. **Check the writer first.** On your own computer with the key set: `python scripts/check_writer.py` (about $0.25). It writes three test chapters; read them in `output/`.
-7. **Test with real money once.** Order a book for yourself, check the PDF, then refund yourself in Stripe. This proves payment → writing → download works end to end.
+6. **Fill in the legal details.** Set `LEGAL_NAME`, `LEGAL_ADDRESS`, `LEGAL_COUNTRY` (and `VAT_ID`, `LEGAL_EFFECTIVE_DATE`) so the legal pages lose their "draft" banner. Work through `docs/legal/LEGAL_CHECKLIST.md`, especially the Stripe restricted-business check and tax.
+7. **Check the writer first.** On your own computer with the key set: `python scripts/check_writer.py` (about $0.25). It writes three test chapters; read them in `output/`.
+8. **Test with real money once.** Order a book for yourself, check the PDF, then refund yourself in Stripe. This proves payment → writing → download works end to end.
 
 ## Running it on your own computer (optional)
 

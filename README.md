@@ -7,6 +7,10 @@ A web product that turns a person's birth date, time and place into a personaliz
 - Founder forecast: [docs/FORECAST.md](docs/FORECAST.md)
 - Launch plan (pre-sale test): [docs/LAUNCH_PLAN.md](docs/LAUNCH_PLAN.md)
 - Putting it online: [docs/DEPLOY.md](docs/DEPLOY.md)
+- Ready-to-post marketing copy: [docs/MARKETING_CONTENT.md](docs/MARKETING_CONTENT.md)
+- Brand name shortlist: [docs/BRAND_NAMES.md](docs/BRAND_NAMES.md)
+- Legal pages and checklist: [docs/legal/LEGAL_CHECKLIST.md](docs/legal/LEGAL_CHECKLIST.md)
+- Showcase page (free chart tool + sample, published privately on claude.ai): `showcase/`
 - Sample book: [samples/maya-sample.pdf](samples/maya-sample.pdf) (fictional person)
 
 Status: all five brief milestones built; ready to deploy once the owner picks a name, price and accounts (see PROGRESS.md).
@@ -20,7 +24,8 @@ Status: all five brief milestones built; ready to deploy once the owner picks a 
 | Writer | `chartbook/reading.py` | Claude writes 7 chapters as structured JSON; every paragraph's citations are checked |
 | Chart wheel | `chartbook/wheel.py`, `glyphs.py` | SVG zodiac wheel with original line glyphs |
 | Book | `chartbook/book.py`, `templates/book.html` | 6×9 in PDF via headless Chromium |
-| Website | `chartbook/web/` | Landing page, free preview, Stripe checkout or "reserve" mode, delivery, data deletion, stats |
+| Website | `chartbook/web/` | Landing page, free preview, Stripe checkout or "reserve" mode, delivery, data deletion, stats, legal pages |
+| Showcase | `showcase/` | Static page with an in-browser chart wheel (no server); `node showcase/check_chart.js` compares it with the Swiss Ephemeris |
 
 ## Try it
 
