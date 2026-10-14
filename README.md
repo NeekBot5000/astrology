@@ -2,6 +2,7 @@
 
 A web product that turns a person's birth date, time and place into a personalized birth-chart reading, delivered as a downloadable PDF book (aimed at birthday gifts).
 
+- **Decisions waiting for the owner: [docs/OWNER_DECISIONS.md](docs/OWNER_DECISIONS.md)**
 - Project plan: [PROJECT_BRIEF.md](PROJECT_BRIEF.md)
 - Progress log: [PROGRESS.md](PROGRESS.md)
 - Founder forecast: [docs/FORECAST.md](docs/FORECAST.md)

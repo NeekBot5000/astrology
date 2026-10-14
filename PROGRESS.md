@@ -2,6 +2,24 @@
 
 Newest entries go at the top. Each entry: date, what was done, what was verified, what is next.
 
+## 2026-10-14 (overnight): showcase published, legal pages, marketing pack
+**Built**
+- **Showcase page, published privately on claude.ai:** https://claude.ai/artifact/VLYVz9jLuJ4ExR9CWAAE6V (code in `showcase/`). It has a free chart wheel that runs in the visitor's browser (12,325 cities built in, nothing sent or saved), real sample-book pages, a sample download and a "save as a story image" button for sharing. You choose who sees it with its Share menu. It can't take orders or sign-ups (claude.ai pages only store data for signed-in viewers), so the real site is still needed for selling.
+- **Legal (owner request):** Terms of Service, Privacy Policy, Refunds and right of withdrawal (with the EU model withdrawal form) and a Legal notice (Impressum) at `/terms`, `/privacy`, `/refunds` and `/legal-notice`. Your business details fill in from settings; until then the pages show a "Draft" banner. Checkout now requires a consent tick box (terms, immediate delivery, and the withdrawal right ending at download), which is recorded and shown on the Stripe receipt. The site sets no cookies any more, so no cookie banner is needed. `docs/legal/LEGAL_CHECKLIST.md` covers what pages can't: tax, registration, Stripe's restricted-business rules, data agreements and licences.
+- **Marketing:** `docs/MARKETING_CONTENT.md` (10 video scripts, Reddit posts, 10 Pinterest pins, 3 emails for people who reserved, messages for friends and creators) and `docs/BRAND_NAMES.md` (10 screened names; top picks Skyprint and Born Beneath).
+- Search-engine basics (robots.txt, sitemap, product data) and `docs/OWNER_DECISIONS.md`.
+
+**Verified**
+- Browser chart maths vs. the Swiss Ephemeris: 60 random births, worst error 0.31 arcminutes; retrograde flags agree in all 600 checks; time zones identical to the Python version on 10 historical and daylight-saving cases.
+- 61 automated tests pass, including in a fresh copy of the repo following the README steps exactly.
+- A code review of the night's work found 10 issues, all fixed. Showcase checked on desktop and phone; share image and sample download exercised with a stand-in download feature.
+
+**NOT verified**
+- The legal texts are drafts written from general knowledge, not legal advice; a lawyer should review them (the facts to check are listed in the checklist).
+- Same as before: no real AI-written book, real payment or Docker build in this sandbox.
+
+**Next:** the decisions in `docs/OWNER_DECISIONS.md` (payment provider check, name, business and tax details), then deploy.
+
 ## 2026-10-14: Milestones 2-5 done, website and launch plan ready
 **Built**
 - Chart wheel image (`wheel.py`), drawn with original line glyphs so it looks the same everywhere.
