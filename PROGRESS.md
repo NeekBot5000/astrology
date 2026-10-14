@@ -67,3 +67,8 @@ Newest entries go at the top. Each entry: date, what was done, what was verified
 - Created the repository with the project brief, instructions for Claude Code, and this log.
 - Nothing is built yet.
 - Next: milestone 1, a birth-chart calculator that works from date, time and place, with tests against a few known charts.
+
+## 2026-10-14 (late): first free marketing post
+- Posted launch post to r/SideProject: https://www.reddit.com/r/SideProject/comments/1x66rbc/ (links Payhip https://payhip.com/b/JaKLT).
+- Not possible yet: r/AppIdeas needs 50+ karma; Instagram API needs a Business/Creator account; YouTube upload can't be staged from the cloud sandbox (owner uploads the 3 videos from the phone).
+- Next: reply to Reddit comments, owner deploys the static site to Cloudflare Pages, more posts once karma grows.
