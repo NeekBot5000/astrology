@@ -19,6 +19,7 @@ class Settings:
     keep_days: int  # how long finished books and birth details are kept
     support_email: str
     admin_token: str | None = None
+    review_books: bool = False  # owner approves each book before the customer can download it
 
     @property
     def payments_enabled(self) -> bool:
@@ -44,4 +45,5 @@ def load_settings() -> Settings:
         keep_days=int(env.get("KEEP_DAYS", "30")),
         support_email=env.get("SUPPORT_EMAIL", "support@example.com"),
         admin_token=env.get("ADMIN_TOKEN") or None,
+        review_books=env.get("REVIEW_BOOKS", "").lower() in ("1", "true", "yes"),
     )

@@ -322,3 +322,32 @@ def test_bot_filter_spares_real_phones():
     assert BOT_UA.search("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
     assert BOT_UA.search("Slackbot-LinkExpanding 1.0")
     assert not BOT_UA.search("Mozilla/5.0 (Linux; Android 12; CUBOT_X30) AppleWebKit/537.36 Chrome/120 Mobile")
+
+
+def test_review_gate_holds_book_until_approved(tmp_path, monkeypatch):
+    monkeypatch.setenv("ADMIN_TOKEN", "tok")
+    monkeypatch.setenv("REVIEW_BOOKS", "true")
+    client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
+    monkeypatch.setattr("chartbook.web.pipeline.render_pdf", lambda html, out: (out.write_bytes(b"%PDF-fake"), out)[1])
+    order_id = start_preview(client)
+    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
+    assert stripe.created[0]["payment_intent_data"]["description"].endswith(f"/order/{order_id}")
+    client.get(f"/order/{order_id}?session_id=cs_test_1")  # starts writing in the background
+    assert app.state.store.get(order_id).status == "review"
+    assert "final read-through" in client.get(f"/order/{order_id}").text
+    assert client.get(f"/order/{order_id}/book.pdf").status_code == 404
+    assert client.get(f"/admin/review/{order_id}.pdf").status_code == 401
+    assert client.get(f"/admin/review/{order_id}.pdf", auth=("x", "tok")).content.startswith(b"%PDF")
+    assert client.post(f"/admin/review/{order_id}/approve").status_code == 401
+    client.post(f"/admin/review/{order_id}/approve", auth=("x", "tok"))
+    assert client.get(f"/order/{order_id}/book.pdf").status_code == 200
+
+
+def test_writer_usage_is_totalled():
+    from chartbook.reading import Usage
+
+    u = Usage()
+    u.add(SimpleNamespace(input_tokens=1000, output_tokens=2000, cache_creation_input_tokens=3000, cache_read_input_tokens=0))
+    u.add(SimpleNamespace(input_tokens=500, output_tokens=2000, cache_creation_input_tokens=0, cache_read_input_tokens=3000))
+    assert u.requests == 2 and u.output == 4000
+    assert u.dollars == pytest.approx((1500 * 4 + 4000 * 20 + 3000 * 5 + 3000 * 0.2) / 1e6)

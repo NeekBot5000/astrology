@@ -198,6 +198,32 @@ class WriterError(RuntimeError):
     pass
 
 
+# Claude Opus 5.5 list prices in dollars per million tokens (check current pricing before relying on these).
+PRICE_PER_MTOK = {"input": 4.00, "output": 20.00, "cache_write": 5.00, "cache_read": 0.20}
+
+
+@dataclass
+class Usage:
+    """Running token totals for one book, to track what each book really costs."""
+
+    input: int = 0
+    output: int = 0
+    cache_write: int = 0
+    cache_read: int = 0
+    requests: int = 0
+
+    def add(self, usage) -> None:
+        self.requests += 1
+        self.input += getattr(usage, "input_tokens", 0) or 0
+        self.output += getattr(usage, "output_tokens", 0) or 0
+        self.cache_write += getattr(usage, "cache_creation_input_tokens", 0) or 0
+        self.cache_read += getattr(usage, "cache_read_input_tokens", 0) or 0
+
+    @property
+    def dollars(self) -> float:
+        return sum(getattr(self, k) * price for k, price in PRICE_PER_MTOK.items()) / 1_000_000
+
+
 def write_chapter(
     client,
     spec: ChapterSpec,
@@ -205,6 +231,7 @@ def write_chapter(
     name: str | None = None,
     focus: set[str] | None = None,
     model: str = MODEL,
+    usage: Usage | None = None,
 ) -> Chapter:
     """Ask Claude for one chapter and return it once it passes validation."""
     focus = focus or set()
@@ -228,6 +255,8 @@ def write_chapter(
             betas=[FALLBACK_BETA],
             fallbacks="default",
         )
+        if usage is not None and getattr(response, "usage", None) is not None:
+            usage.add(response.usage)
         if response.stop_reason == "refusal":
             raise WriterError(f"Model declined to write {spec.key!r}")
         if response.stop_reason == "max_tokens":
@@ -250,8 +279,10 @@ def write_chapter(
     raise WriterError(f"Chapter {spec.key!r} failed validation: {problems}")
 
 
-def write_book(client, facts: list[Fact], name: str | None, focus: set[str]) -> list[Chapter]:
+def write_book(
+    client, facts: list[Fact], name: str | None, focus: set[str], usage: Usage | None = None
+) -> list[Chapter]:
     unknown = focus - FOCUS_AREAS
     if unknown:
         raise ValueError(f"Unknown focus areas: {unknown}")
-    return [write_chapter(client, spec, facts, name, focus) for spec in CHAPTERS]
+    return [write_chapter(client, spec, facts, name, focus, usage=usage) for spec in CHAPTERS]

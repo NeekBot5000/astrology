@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS orders (
     source TEXT,
     reserved_at TEXT,
     checkout_at TEXT,
-    paid_at TEXT
+    paid_at TEXT,
+    cost_cents INTEGER
 );
 CREATE TABLE IF NOT EXISTS visits (
     day TEXT NOT NULL,
@@ -47,8 +48,8 @@ CREATE TABLE IF NOT EXISTS visits (
 );
 """
 
-# preview -> (awaiting_payment -> paid | preorder) -> writing -> ready | failed ; any -> deleted
-STATUSES = {"preview", "awaiting_payment", "preorder", "paid", "writing", "ready", "failed", "deleted"}
+# preview -> (awaiting_payment -> paid | preorder) -> writing -> [review ->] ready | failed ; any -> deleted
+STATUSES = {"preview", "awaiting_payment", "preorder", "paid", "writing", "review", "ready", "failed", "deleted"}
 PREORDER_DAYS = 120
 PERSONAL = ("name", "email", "birth_date", "birth_time", "place_name", "latitude", "longitude", "tz", "dedication")
 
@@ -76,6 +77,7 @@ class Order:
     reserved_at: str | None = None  # when they reserved a copy (pre-order mode)
     checkout_at: str | None = None  # when they last went to the payment page
     paid_at: str | None = None  # kept after erasing, so sales stay countable
+    cost_cents: int | None = None  # AI writing cost for this book
 
     @property
     def focus_set(self) -> set[str]:
@@ -93,9 +95,10 @@ class Store:
             c.executescript(SCHEMA)
             # Add columns that older databases don't have yet.
             cols = {r["name"] for r in c.execute("PRAGMA table_info(orders)")}
-            for col in ("source", "reserved_at", "checkout_at", "paid_at"):
+            for col, kind in (("source", "TEXT"), ("reserved_at", "TEXT"), ("checkout_at", "TEXT"),
+                              ("paid_at", "TEXT"), ("cost_cents", "INTEGER")):
                 if col not in cols:
-                    c.execute(f"ALTER TABLE orders ADD COLUMN {col} TEXT")
+                    c.execute(f"ALTER TABLE orders ADD COLUMN {col} {kind}")
 
     @contextmanager
     def _conn(self) -> Iterator[sqlite3.Connection]:
@@ -203,10 +206,17 @@ class Store:
                 x["paid"] += r["paid"]
         return sorted(rows.values(), key=lambda x: (-x["paid"], -x["visits"]))
 
-    def preorders(self) -> list[Order]:
+    def with_status(self, status: str) -> list[Order]:
         with self._conn() as c:
-            rows = c.execute("SELECT * FROM orders WHERE status = 'preorder' ORDER BY created_at").fetchall()
+            rows = c.execute("SELECT * FROM orders WHERE status = ? ORDER BY created_at", (status,)).fetchall()
         return [Order(**dict(r)) for r in rows]
+
+    def preorders(self) -> list[Order]:
+        return self.with_status("preorder")
+
+    def average_cost_cents(self) -> float | None:
+        with self._conn() as c:
+            return c.execute("SELECT AVG(cost_cents) FROM orders WHERE cost_cents IS NOT NULL").fetchone()[0]
 
     def counts(self, since: str | None = None) -> dict[str, int]:
         """Orders per status, optionally only those created on or after `since` (ISO date)."""

@@ -268,6 +268,8 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
             }],
             "customer_email": email,
             "client_reference_id": order.id,
+            # Shown on Stripe's emailed receipt, so the customer can always find the download page again.
+            "payment_intent_data": {"description": f"Your book: {settings.base_url}/order/{order.id}"},
             "metadata": {"order_id": order.id},
             "success_url": f"{settings.base_url}/order/{order.id}?session_id={{CHECKOUT_SESSION_ID}}",
             "cancel_url": f"{settings.base_url}/p/{order.id}",
@@ -278,7 +280,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     def _mark_paid(order_id: str, background: BackgroundTasks) -> None:
         if store.claim(order_id, ("awaiting_payment",), "paid"):
             store.update(order_id, paid_at=now().isoformat())
-            background.add_task(make_book, store, order_id, writer_client, settings.data_dir)
+            background.add_task(make_book, store, order_id, writer_client, settings.data_dir, settings.review_books)
 
     @app.get("/order/{order_id}", response_class=HTMLResponse)
     def order_status(request: Request, order_id: str, background: BackgroundTasks, session_id: str | None = None):
@@ -362,7 +364,9 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         previews = sum(r["previews"] for r in funnel)
         reached = {"preorder": sum(r["preorders"] for r in funnel), "paid": store.paid_count(since or None)}
         counts = store.counts(since or None)
-        return page(request, "stats.html", counts=counts, previews=previews, reached=reached, since=since, funnel=funnel)
+        avg = store.average_cost_cents()
+        return page(request, "stats.html", counts=counts, previews=previews, reached=reached, since=since, funnel=funnel,
+                    avg_cost=None if avg is None else avg / 100, failed=store.with_status("failed"))
 
     @app.get("/admin/preorders.csv")
     def preorders_csv(request: Request):
@@ -375,6 +379,33 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
             w.writerow([o.created_at[:10], o.email, o.name, f"{settings.base_url}/p/{o.id}", o.source or ""])
         return Response(out.getvalue(), media_type="text/csv",
                         headers={"Content-Disposition": 'attachment; filename="preorders.csv"'})
+
+    @app.get("/admin/review", response_class=HTMLResponse)
+    def review_list(request: Request):
+        require_admin(request)
+        return page(request, "review.html", orders=store.with_status("review"), review_on=settings.review_books)
+
+    @app.get("/admin/review/{order_id}.pdf")
+    def review_pdf(request: Request, order_id: str):
+        require_admin(request)
+        order = _order_or_404(order_id)
+        if order.status != "review" or not order.pdf_path:
+            raise HTTPException(404)
+        return FileResponse(order.pdf_path, media_type="application/pdf")
+
+    @app.post("/admin/review/{order_id}/approve")
+    def review_approve(request: Request, order_id: str):
+        require_admin(request)
+        if store.claim(order_id, ("review",), "ready"):
+            store.update(order_id, ready_at=now().isoformat())
+        return RedirectResponse("/admin/review", status_code=303)
+
+    @app.post("/admin/review/{order_id}/rewrite")
+    def review_rewrite(request: Request, order_id: str, background: BackgroundTasks):
+        require_admin(request)
+        if store.claim(order_id, ("review", "failed"), "paid"):
+            background.add_task(make_book, store, order_id, writer_client, settings.data_dir, settings.review_books)
+        return RedirectResponse("/admin/review", status_code=303)
 
     @app.get("/health")
     def health():

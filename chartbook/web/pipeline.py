@@ -8,7 +8,7 @@ from datetime import date, time
 from ..book import BookInput, render_html, render_pdf
 from ..chart import Chart, compute_chart
 from ..facts import chart_facts
-from ..reading import write_book
+from ..reading import Usage, write_book
 from ..sample import time_text
 from .store import Order, Store, now
 
@@ -25,7 +25,7 @@ def order_chart(order: Order) -> Chart:
     )
 
 
-def make_book(store: Store, order_id: str, client_factory, data_dir) -> None:
+def make_book(store: Store, order_id: str, client_factory, data_dir, review: bool = False) -> None:
     """Write and render the book for a paid order. Safe to call twice: only one call does the work."""
     if not store.claim(order_id, ("paid",), "writing"):
         return
@@ -33,7 +33,8 @@ def make_book(store: Store, order_id: str, client_factory, data_dir) -> None:
     try:
         chart = order_chart(order)
         facts = chart_facts(chart, order.name)
-        chapters = write_book(client_factory(), facts, order.name, order.focus_set)
+        usage = Usage()
+        chapters = write_book(client_factory(), facts, order.name, order.focus_set, usage=usage)
         book = BookInput(
             name=order.name,
             chart=chart,
@@ -47,7 +48,13 @@ def make_book(store: Store, order_id: str, client_factory, data_dir) -> None:
         books = data_dir / "books"
         books.mkdir(exist_ok=True)
         pdf = render_pdf(render_html(book), books / f"{order.id}.pdf")
-        store.update(order_id, status="ready", pdf_path=str(pdf), ready_at=now().isoformat(), error=None)
+        log.info("Book %s written: %d requests, %d output tokens, about $%.2f", order_id, usage.requests, usage.output, usage.dollars)
+        if review:
+            # Owner reads it first and approves it from the admin page.
+            store.update(order_id, status="review", pdf_path=str(pdf), cost_cents=round(usage.dollars * 100), error=None)
+        else:
+            store.update(order_id, status="ready", pdf_path=str(pdf), ready_at=now().isoformat(),
+                         cost_cents=round(usage.dollars * 100), error=None)
     except Exception as e:  # noqa: BLE001 - any failure must land on the order, not vanish
         log.exception("Book generation failed for %s", order_id)
         store.update(order_id, status="failed", error=f"{type(e).__name__}: {e}"[:500])

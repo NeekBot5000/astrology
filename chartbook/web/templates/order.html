@@ -23,10 +23,14 @@
   {% elif order.status == "awaiting_payment" %}
     <p><span class="spinner" aria-hidden="true"></span>Waiting for the payment to be confirmed. This page refreshes on its own.</p>
     <p class="small">Closed the payment page by accident? <a href="/p/{{ order.id }}">Go back to the preview</a>.</p>
+  {% elif order.status == "review" %}
+    <h2>Almost there</h2>
+    <p>{{ order.name }}'s book is written and is getting a final read-through by a person before it's released. That usually happens within a few hours; this page will have the download button as soon as it's done.</p>
+    <p class="small">Your payment receipt from Stripe includes a link back to this page.</p>
   {% elif order.status in ("paid", "writing") %}
     <h2>Writing the book</h2>
     <p><span class="spinner" aria-hidden="true"></span>Payment received, thank you. Seven chapters are being written from {{ order.name }}'s chart. This usually takes a few minutes and the page refreshes on its own.</p>
-    <p class="small">You can safely close this page. Bookmark it to come back: the link is private to you.</p>
+    <p class="small">You can safely close this page. Your payment receipt from Stripe includes a link back here.</p>
   {% elif order.status == "ready" %}
     <h2>It's ready</h2>
     <p>{{ order.name }}'s book is finished.</p>

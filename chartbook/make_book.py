@@ -17,7 +17,7 @@ from pathlib import Path
 
 from .book import render_html, render_pdf
 from .location import lookup_place, timezone_at
-from .reading import FOCUS_AREAS, write_book
+from .reading import FOCUS_AREAS, Usage, write_book
 from .sample import load_book
 
 
@@ -63,7 +63,9 @@ def main() -> None:
         import anthropic
 
         print(f"Writing 7 chapters for {a.name}...")
-        chapters = write_book(anthropic.Anthropic(), draft.facts, a.name, set(a.focus))
+        usage = Usage()
+        chapters = write_book(anthropic.Anthropic(), draft.facts, a.name, set(a.focus), usage=usage)
+        print(f"{usage.requests} requests, {usage.output:,} output tokens, cache reads {usage.cache_read:,}: about ${usage.dollars:.2f}")
         record["chapters"] = [c.model_dump() for c in chapters]
         book_json.write_text(json.dumps(record, indent=2))
         print(f"Saved text to {book_json}")

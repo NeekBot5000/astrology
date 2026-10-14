@@ -10,9 +10,13 @@ Newest entries go at the top. Each entry: date, what was done, what was verified
 - Sample book for a made-up person, "Maya" (`samples/maya.json` + `maya-sample.pdf`, 22 pages). I wrote it by hand in the same format and it passes the same automatic checks.
 - Website (`chartbook/web/`): landing page with the sample chapter, free chart preview, Stripe checkout, an order page that shows progress, PDF download, one-click "erase my data", automatic deletion after 30 days, a private stats page with visitors → previews → paid per marketing link, and a CSV of reserved-copy emails. Without a Stripe key it runs in "reserve a copy" mode (collects emails, takes no money), which suits the pre-sale test.
 - `make_book` command, Dockerfile, `docs/DEPLOY.md`, `docs/LAUNCH_PLAN.md`.
+- Optional review mode (`REVIEW_BOOKS=true`): you read and approve each book at `/admin/review` before the customer gets it, with a "rewrite" button. Failed books show on the stats page with a retry button.
+- Stripe receipts include the link to the customer's download page, so a closed tab doesn't lose the book (the site sends no email of its own yet).
+- AI cost is recorded per book and averaged on the stats page.
+- `scripts/check_writer.py`: once you have an API key, writes 3 test chapters for tricky charts (about $0.25) so you can check quality before launch.
 
 **Verified**
-- 41 automated tests pass (the PDF test needs Chromium): chart accuracy, writer validation and retry using a fake AI, the full paid flow using a fake Stripe (payment → writing → download → delete), webhook signature check, no double writing, purge rules, link tracking.
+- 43 automated tests pass (the PDF test needs Chromium): chart accuracy, writer validation and retry using a fake AI, the full paid flow using a fake Stripe (payment → writing → download → delete), webhook signature check, no double writing, purge rules, link tracking.
 - Accessibility: automated axe-core scan clean on all pages; contrast fixed (input borders, focus ring, wheel labels); keyboard order checked; no sideways scrolling at 320 px or 200% text.
 - A security review of the whole branch found no high-confidence issues. A code review found 10 bugs (e.g. a reservation could be erased mid-checkout, paid sales vanished from stats after deletion, rate limit broken behind a hosting proxy); all fixed with tests.
 
