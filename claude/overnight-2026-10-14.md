@@ -1,7 +1,7 @@
 # Overnight session, 2026-10-14: report
 
 **Goal (owner's words):** "do whatever means necessary to finish the thing and publish and market it somehow, have full access on computer", plus, mid-session: "add terms of service and all the legal things necessary".
-**Time:** started 04:57 UTC. Planned to run to 12:57 UTC (8 hours; no duration was given). Finished early, at about 06:10 UTC, because every task was done and the review pass had nothing left that wasn't invented scope.
+**Time:** started 04:57 UTC. Planned to run to 12:57 UTC (8 hours; no duration was given). Finished early, at 06:07 UTC, because every task was done and the review pass had nothing left that wasn't invented scope.
 
 ## Outcome
 - **Published:** a showcase page on claude.ai, private until you share it: https://claude.ai/artifact/VLYVz9jLuJ4ExR9CWAAE6V. It has a free chart wheel in the browser, real sample pages, a sample-book download and a "save as a story image" share button.
@@ -63,8 +63,8 @@ See `docs/OWNER_DECISIONS.md`. The top three: whether Stripe accepts astrology p
     in check exit code, stale comment, orphan /policies page removed (now redirects to /terms), glyph-drift test).
     Added showcase/make_reference.py. 60 tests pass; JS check passes; showcase republished (v2) with all 9 files. — 06:03
 [x] Search basics for the real site: /robots.txt (hides order/admin pages), /sitemap.xml, Product structured data
-    (price, PreOrder/InStock), canonical link. Test added. — ~06:10
+    (price, PreOrder/InStock), canonical link. Test added. — ~06:04
 [x] Showcase v3: "Save as a story image" (1080x1920 PNG with wheel + Sun/Moon/rising + brand line), saved via the
-    download capability. Verified locally with a stand-in download API: image renders correctly, no script errors. — ~06:15
+    download capability. Verified locally with a stand-in download API: image renders correctly, no script errors. — ~06:05
 
 ## PARKED
