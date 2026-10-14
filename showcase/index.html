@@ -97,6 +97,7 @@ th { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: 
 /* Promise */
 .promises { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .promises div { border: 1px solid var(--rule); border-radius: 12px; padding: 18px; display: grid; gap: 6px; }
+.how { margin: 0; padding-left: 22px; display: grid; gap: 6px; max-width: 40em; }
 .price { font-family: var(--display); font-size: 64px; color: var(--gold); line-height: 1; }
 footer.band { padding-block: 32px 48px; }
 footer p + p { margin-top: 8px; }
@@ -110,7 +111,8 @@ footer p + p { margin-top: 8px; }
       <h1>A birth-chart book written for one person</h1>
       <p class="lede">We calculate the real sky at the moment someone was born, then write a 22-page book about them where every paragraph names the part of their chart it comes from. A gift that feels personal, delivered as a PDF.</p>
       <div class="actions">
-        <a class="btn btn-gold" href="#chart">Draw a chart free</a>
+        <a class="btn btn-gold" href="https://payhip.com/b/JaKLT" target="_blank" rel="noopener">Order a book · $9</a>
+        <a class="btn btn-ghost" href="#chart">Draw a chart free</a>
         <button class="btn btn-ghost" type="button" id="dl-hero">Download a sample book</button>
       </div>
       <p class="small" id="dl-status-hero" role="status"></p>
@@ -160,7 +162,7 @@ footer p + p { margin-top: 8px; }
       <div style="display:grid; gap:22px; min-width:0">
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between">
           <h3 id="result-title" style="font-size:32px; font-weight:500">Maya's sky</h3>
-          <button class="btn btn-ghost" type="button" id="share-img" hidden>Save as a story image</button>
+          <button class="btn btn-ghost" type="button" id="share-img">Save as a story image</button>
         </div>
         <p class="small" id="share-status" role="status"></p>
         <div class="big3" id="big3"></div>
@@ -168,6 +170,7 @@ footer p + p { margin-top: 8px; }
         <div class="teaser">
           <p id="teaser-text">That's three of the twelve points in this chart. The book reads them all together, chapter by chapter: personality, mind, love, work, home, growth and direction.</p>
           <p class="small">Free chart: planets and the angles between them, with the rising sign from the nearest large city. The book adds houses, exact birthplace coordinates and seven written chapters.</p>
+          <p><a class="btn btn-gold" href="https://payhip.com/b/JaKLT" target="_blank" rel="noopener">Get the full book · $9</a></p>
         </div>
       </div>
     </div>
@@ -209,17 +212,23 @@ footer p + p { margin-top: 8px; }
 
 <section class="band" aria-labelledby="promise-h">
   <div class="inner">
-    <p class="eyebrow">Coming this November</p>
+    <p class="eyebrow">Order now</p>
     <h2 id="promise-h">One book, one honest price</h2>
     <div class="price">$9</div>
     <div class="promises">
       <div><h3>Pay once</h3><p class="muted">No subscription and no account. There's nothing to cancel.</p></div>
       <div><h3>14-day refund</h3><p class="muted">If the book doesn't feel personal, you get your money back. No forms.</p></div>
-      <div><h3>Ready in minutes</h3><p class="muted">A 6×9 inch PDF to email, or to print like a paperback. Perfect for a last-minute gift.</p></div>
+      <div><h3>By email within 24 hours</h3><p class="muted">Each book is checked by a person before it's sent. A 6×9 inch PDF to forward, or to print like a paperback.</p></div>
       <div><h3>Private by design</h3><p class="muted">Birth details are used to make the book, then deleted.</p></div>
     </div>
+    <ol class="how">
+      <li><strong>Pay $9</strong> on our secure checkout (Payhip).</li>
+      <li><strong>Fill in a short form</strong> with the birth date, time and place, plus an optional gift note.</li>
+      <li><strong>Get the book by email</strong> within 24 hours.</li>
+    </ol>
     <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center">
-      <button class="btn btn-gold" type="button" id="dl-bottom">Download Maya's sample book (PDF)</button>
+      <a class="btn btn-gold" href="https://payhip.com/b/JaKLT" target="_blank" rel="noopener">Order a book · $9</a>
+      <button class="btn btn-ghost" type="button" id="dl-bottom">Download Maya's sample book (PDF)</button>
       <p class="small" id="dl-status-bottom" role="status"></p>
     </div>
   </div>
@@ -229,7 +238,7 @@ footer p + p { margin-top: 8px; }
 <footer class="band">
   <div class="inner">
     <p class="small">Books are for entertainment and self-reflection, not predictions or professional advice. Planet positions in the free chart come from Astronomy Engine; the books use the Swiss Ephemeris. City data: GeoNames (CC BY 4.0).</p>
-    
+    <p class="small"><a href="legal.html">Terms, privacy, refunds and legal notice</a></p>
   </div>
 </footer>
 
@@ -352,17 +361,25 @@ footer p + p { margin-top: 8px; }
 
   $("chart-form").addEventListener("submit", function (e) { e.preventDefault(); draw(); });
 
-  // Sample book download (the viewer confirms the save).
+  // Saving files: on claude.ai the viewer confirms through the downloads capability;
+  // on an ordinary website a normal browser download is used instead.
   var downloads = null;
+  async function saveFile(filename, blob) {
+    if (downloads) return downloads.save({ filename: filename, data: blob });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
   async function saveSample(statusId) {
     var status = $(statusId);
-    if (!downloads) { status.textContent = "Downloads aren't available in this view."; return; }
     status.textContent = "Preparing the PDF…";
     try {
       var res = await fetch("maya-sample.pdf");
       if (!res.ok) throw new Error("missing file");
       var blob = await res.blob();
-      await downloads.save({ filename: "skyprint-sample-book.pdf", data: blob });
+      await saveFile("skyprint-sample-book.pdf", blob);
       status.textContent = "Saved.";
     } catch (e) {
       status.textContent = e && e.code === "declined" ? "" : "The download didn't start. Try again in a moment.";
@@ -417,12 +434,12 @@ footer p + p { margin-top: 8px; }
   }
   $("share-img").addEventListener("click", async function () {
     var status = $("share-status");
-    if (!downloads || !last) return;
+    if (!last) return;
     status.textContent = "Making the image…";
     try {
       var blob = await storyImage();
       var file = (last.name ? last.name.replace(/[^A-Za-z0-9-]+/g, "-") + "-" : "") + "birth-chart.png";
-      await downloads.save({ filename: file, data: blob });
+      await saveFile(file, blob);
       status.textContent = "Saved.";
     } catch (e) {
       status.textContent = e && e.code === "declined" ? "" : "The image didn't save. Try again in a moment.";
@@ -430,11 +447,7 @@ footer p + p { margin-top: 8px; }
   });
 
   if (window.claude && window.claude.use) {
-    window.claude.use("downloads").then(function (d) {
-      downloads = d;
-      if (!d) ["hero", "bottom"].forEach(function (k) { $("dl-" + k).hidden = true; });
-      else $("share-img").hidden = false;
-    });
+    window.claude.use("downloads").then(function (d) { downloads = d; });
   }
 })();
 </script>
