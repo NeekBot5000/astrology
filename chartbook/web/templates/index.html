@@ -1,4 +1,16 @@
 {% extends "base.html" %}
+{% block head %}
+<link rel="canonical" href="{{ base_url }}/">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "Product",
+ "name": "Personalized birth-chart book",
+ "brand": {"@type": "Brand", "name": {{ brand | tojson }}},
+ "description": "A 22-page birth-chart book written for one person from their exact birth date, time and place. Every paragraph names the placement it comes from. PDF, delivered in minutes.",
+ "image": "{{ base_url }}/static/og.png",
+ "offers": {"@type": "Offer", "price": {{ price_number | tojson }}, "priceCurrency": {{ currency | upper | tojson }},
+            "availability": "https://schema.org/{{ 'InStock' if payments else 'PreOrder' }}", "url": "{{ base_url }}/"}}
+</script>
+{% endblock %}
 {% block main %}
 <section class="hero">
   <div class="wrap">

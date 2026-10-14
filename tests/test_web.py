@@ -454,3 +454,17 @@ def test_showcase_glyphs_match_the_book():
     js = Path("showcase/wheel.js").read_text()
     data = json.loads(re.search(r"var GLYPHS = (\{.*?\});\n", js, re.S).group(1))
     assert data == {"signs": SIGN_GLYPHS, "bodies": BODY_GLYPHS}, "regenerate showcase/wheel.js from chartbook/glyphs.py"
+
+
+def test_search_engine_files_and_product_data(tmp_path, monkeypatch):
+    import json
+    import re
+
+    client, *_ = make_client(tmp_path, monkeypatch)
+    robots = client.get("/robots.txt").text
+    assert "Disallow: /order/" in robots and "Disallow: /admin/" in robots and "sitemap.xml" in robots
+    assert "<loc>http://localhost:8000/terms</loc>" in client.get("/sitemap.xml").text
+    page = client.get("/").text
+    data = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1))
+    assert data["offers"]["price"] == "29.00" and data["offers"]["priceCurrency"] == "USD"
+    assert data["offers"]["availability"].endswith("PreOrder")

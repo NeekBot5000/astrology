@@ -154,7 +154,8 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     sample_sources = [" · ".join(sample_labels[c] for c in p.cites) for p in sample_chapter.paragraphs]
     hero_wheel = render_wheel(sample_book.chart, 600, "Sample chart wheel", palette="night")
 
-    landing = dict(chapter=sample_chapter, sample_sources=sample_sources, hero_wheel=hero_wheel, focus_labels=FOCUS_LABELS)
+    landing = dict(chapter=sample_chapter, sample_sources=sample_sources, hero_wheel=hero_wheel, focus_labels=FOCUS_LABELS,
+                   price_number=f"{settings.price_cents / 100:.2f}", currency=settings.currency)
 
     legal = legal_context(settings)
 
@@ -486,6 +487,22 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         if store.claim(order_id, ("review", "failed"), "paid"):
             background.add_task(make_book, store, order_id, writer_client, settings.data_dir, settings.review_books)
         return RedirectResponse("/admin/review", status_code=303)
+
+    @app.get("/robots.txt")
+    def robots():
+        # Keep private order pages and owner pages out of search engines.
+        body = (
+            "User-agent: *\nDisallow: /p/\nDisallow: /order/\nDisallow: /admin/\n"
+            f"Sitemap: {settings.base_url}/sitemap.xml\n"
+        )
+        return Response(body, media_type="text/plain")
+
+    @app.get("/sitemap.xml")
+    def sitemap():
+        paths = ["/", "/terms", "/privacy", "/refunds", "/legal-notice"]
+        urls = "".join(f"<url><loc>{settings.base_url}{p}</loc></url>" for p in paths)
+        body = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
+        return Response(body, media_type="application/xml")
 
     @app.get("/health")
     def health():

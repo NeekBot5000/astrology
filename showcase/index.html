@@ -158,7 +158,11 @@ footer p + p { margin-top: 8px; }
     <div class="result" id="result" aria-live="polite">
       <div class="wheel" id="wheel"><p class="small" style="color:#6d6a78; padding:24px">Loading the sky…</p></div>
       <div style="display:grid; gap:22px; min-width:0">
-        <h3 id="result-title" style="font-size:32px; font-weight:500">Maya's sky</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between">
+          <h3 id="result-title" style="font-size:32px; font-weight:500">Maya's sky</h3>
+          <button class="btn btn-ghost" type="button" id="share-img" hidden>Save as a story image</button>
+        </div>
+        <p class="small" id="share-status" role="status"></p>
         <div class="big3" id="big3"></div>
         <div class="table-wrap"><table id="positions" aria-label="Planet positions"></table></div>
         <div class="teaser">
@@ -258,6 +262,7 @@ footer p + p { margin-top: 8px; }
 
   var $ = function (id) { return document.getElementById(id); };
   var cities = null, index = {}, countries = {}, zones = [];
+  var last = null;  // the chart currently on screen, for the share image
 
   function label(c) {
     return [c[0], c[1], countries[c[2]] || c[2]].filter(Boolean).join(", ");
@@ -303,6 +308,7 @@ footer p + p { margin-top: 8px; }
     if (!utc) { err.textContent = "Clocks jumped forward for daylight saving at that exact time there, so it never happened. Check the time on the birth certificate."; return; }
 
     var chart = BirthChart.compute(utc, city[3], city[4], !unknown);
+    last = { chart: chart, name: $("name").value.trim().slice(0, 40), date: dateVal, unknown: unknown, time: timeVal, place: label(city) };
     var name = $("name").value.trim().slice(0, 40);
     $("result-title").textContent = name ? name + "'s sky" : "The sky that day";
     $("wheel").innerHTML = ChartWheel.render(chart, (name ? name + "'s" : "Birth") + " chart wheel");
@@ -365,10 +371,69 @@ footer p + p { margin-top: 8px; }
   ["hero", "bottom"].forEach(function (k) {
     $("dl-" + k).addEventListener("click", function () { saveSample("dl-status-" + k); });
   });
+  // A 1080x1920 "story" image of the chart, drawn on a canvas.
+  function loadSvg(svg) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("svg")); };
+      img.src = url;
+    });
+  }
+  async function storyImage() {
+    var c = document.createElement("canvas");
+    c.width = 1080; c.height = 1920;
+    var g = c.getContext("2d");
+    try { await document.fonts.load('500 96px "Cormorant Garamond"'); await document.fonts.load('400 40px "Source Serif 4"'); } catch (e) {}
+    var bg = g.createRadialGradient(800, 200, 50, 540, 700, 1500);
+    bg.addColorStop(0, "#2d3566"); bg.addColorStop(1, "#1c2140");
+    g.fillStyle = bg; g.fillRect(0, 0, 1080, 1920);
+    g.textAlign = "center";
+    g.fillStyle = "#cdbb8a"; g.font = '400 30px "Source Serif 4", Georgia, serif';
+    g.fillText("B I R T H   C H A R T", 540, 150);
+    g.fillStyle = "#e8d7a8"; g.font = '500 104px "Cormorant Garamond", Georgia, serif';
+    g.fillText(last.name ? last.name + "'s sky" : "The sky that day", 540, 270);
+    var when = new Date(last.date + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+    g.fillStyle = "#ece6d6"; g.font = '400 34px "Source Serif 4", Georgia, serif';
+    g.fillText(when + (last.unknown ? "" : " · " + last.time) + " · " + last.place.split(",")[0], 540, 335);
+    // wheel on a paper disc
+    g.fillStyle = "#fbfaf7"; g.beginPath(); g.arc(540, 820, 430, 0, Math.PI * 2); g.fill();
+    var img = await loadSvg(ChartWheel.render(last.chart, "chart"));
+    g.drawImage(img, 540 - 420, 820 - 420, 840, 840);
+    var big = [["SUN", last.chart.planets[0].sign], ["MOON", last.chart.planets[1].sign]];
+    if (last.chart.ascendant) big.push(["RISING", last.chart.ascendant.sign]);
+    var colW = 1080 / big.length;
+    big.forEach(function (b, i) {
+      var x = colW * i + colW / 2;
+      g.fillStyle = "#b7b0c9"; g.font = '600 28px "Source Serif 4", Georgia, serif'; g.fillText(b[0], x, 1385);
+      g.fillStyle = "#e8d7a8"; g.font = '500 70px "Cormorant Garamond", Georgia, serif'; g.fillText(b[1], x, 1465);
+    });
+    g.fillStyle = "#ece6d6"; g.font = 'italic 400 36px "Source Serif 4", Georgia, serif';
+    g.fillText("Every planet, every angle, one book written for you.", 540, 1620);
+    g.fillStyle = "#cdbb8a"; g.font = '400 32px "Source Serif 4", Georgia, serif';
+    g.fillText("Free chart at Birth Sky Books", 540, 1780);
+    return await new Promise(function (resolve) { c.toBlob(resolve, "image/png"); });
+  }
+  $("share-img").addEventListener("click", async function () {
+    var status = $("share-status");
+    if (!downloads || !last) return;
+    status.textContent = "Making the image…";
+    try {
+      var blob = await storyImage();
+      var file = (last.name ? last.name.replace(/[^A-Za-z0-9-]+/g, "-") + "-" : "") + "birth-chart.png";
+      await downloads.save({ filename: file, data: blob });
+      status.textContent = "Saved.";
+    } catch (e) {
+      status.textContent = e && e.code === "declined" ? "" : "The image didn't save. Try again in a moment.";
+    }
+  });
+
   if (window.claude && window.claude.use) {
     window.claude.use("downloads").then(function (d) {
       downloads = d;
       if (!d) ["hero", "bottom"].forEach(function (k) { $("dl-" + k).hidden = true; });
+      else $("share-img").hidden = false;
     });
   }
 })();
