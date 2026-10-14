@@ -16,7 +16,7 @@ from .reading import CHAPTERS, Chapter
 from .wheel import render_wheel
 
 HERE = Path(__file__).parent
-BRAND = "Birth Sky Books"  # working name; see PROGRESS.md before using publicly
+BRAND = "Skyprint"  # check the trademark and domain before using publicly
 
 _env = Environment(
     loader=FileSystemLoader(HERE / "templates"),
@@ -87,7 +87,7 @@ def render_html(book: BookInput) -> str:
     return template.render(
         brand=BRAND,
         name=book.name,
-        title=f"{book.name}’s Birth Sky",
+        title=f"{book.name}’s Skyprint",
         birth_date=f"{book.birth_date.day} {book.birth_date:%B %Y}",
         birth_time=book.birth_time_text,
         birth_place=book.birth_place,

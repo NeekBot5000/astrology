@@ -48,7 +48,7 @@ def load_settings() -> Settings:
     return Settings(
         base_url=env.get("BASE_URL", "http://localhost:8000").rstrip("/"),
         data_dir=data_dir,
-        price_cents=int(env.get("PRICE_CENTS", "2900")),
+        price_cents=int(env.get("PRICE_CENTS", "900")),
         currency=env.get("CURRENCY", "usd"),
         stripe_secret_key=env.get("STRIPE_SECRET_KEY") or None,
         stripe_webhook_secret=env.get("STRIPE_WEBHOOK_SECRET") or None,

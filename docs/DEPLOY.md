@@ -7,7 +7,7 @@ Plain-language guide. "Hosting" means renting a computer on the internet that ru
 | Thing | What it is | Cost |
 |---|---|---|
 | A host that runs Docker containers and has a **persistent disk** | Where the site runs. A "persistent disk" keeps orders and books when the site restarts. Render, Railway and Fly.io all work. | ~$7-15/month |
-| A domain name | The web address, e.g. birthskybooks.com (check the name first) | ~$12/year |
+| A domain name | The web address, e.g. skyprint.example (check the name first) | ~$12/year |
 | Stripe account | Takes card payments; pays out to your bank | 2.9% + 30¢ per sale |
 | Anthropic API key | Writes the books | ~$0.30-0.80 per book |
 
@@ -18,7 +18,7 @@ The site is packaged as a **Docker image** (a sealed box containing the code and
 1. **Create the service.** In Render: New → Web Service → connect this GitHub repo → it detects the Dockerfile. Pick the smallest paid instance (the free tier sleeps and has no disk).
 2. **Add a disk.** In the service settings, add a disk mounted at `/data`, 1 GB is plenty.
 3. **Set environment variables** (the settings the code reads, listed in `.env.example`):
-   - `BASE_URL`: your address, e.g. `https://birthskybooks.com`
+   - `BASE_URL`: your address, e.g. `https://skyprint.example`
    - `DATA_DIR`: `/data`
    - `ANTHROPIC_API_KEY`: from console.anthropic.com → API keys
    - `SUPPORT_EMAIL`: an inbox you read

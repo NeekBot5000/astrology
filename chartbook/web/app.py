@@ -323,7 +323,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
                 "price_data": {
                     "currency": settings.currency,
                     "unit_amount": settings.price_cents,
-                    "product_data": {"name": f"{order.name}'s Birth Sky (personalized PDF book)"},
+                    "product_data": {"name": f"{order.name}'s Skyprint (personalized birth-chart PDF book)"},
                 },
             }],
             "customer_email": email,
@@ -364,7 +364,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         if order.status != "ready" or not order.pdf_path or not Path(order.pdf_path).exists():
             raise HTTPException(404)
         safe_name = re.sub(r"[^A-Za-z0-9-]+", "-", order.name).strip("-") or "your"
-        filename = f"{safe_name}-birth-sky.pdf"
+        filename = f"{safe_name}-skyprint.pdf"
         return FileResponse(order.pdf_path, media_type="application/pdf", filename=filename)
 
     @app.post("/order/{order_id}/delete")
@@ -396,7 +396,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
 
     @app.get("/sample.pdf")
     def sample_pdf():
-        return FileResponse(ROOT / "samples/maya-sample.pdf", media_type="application/pdf", filename="sample-birth-sky-book.pdf")
+        return FileResponse(ROOT / "samples/maya-sample.pdf", media_type="application/pdf", filename="skyprint-sample-book.pdf")
 
     @app.get("/policies")
     def policies():

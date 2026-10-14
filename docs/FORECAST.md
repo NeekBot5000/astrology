@@ -41,6 +41,6 @@ After about 1,000 visitors who were actually targeted (from your own posts, not 
 
 ## Update after building (2026-10-14)
 - **Build risk is gone.** The whole product (chart, AI writer, PDF, checkout, delivery) exists and is tested. What's left is accounts, a name and a deploy, which is days of work, not weeks.
-- **Unit economics hold:** estimated AI cost is $0.30-0.80 per book (the site records the real number per order), plus card fees of about $1.15 on a $29 sale. You keep roughly $27.
+- **Unit economics hold:** estimated AI cost is $0.30-0.80 per book (the site records the real number per order), plus card fees of about $0.56 on a $9 sale. You keep roughly $8. (Price lowered from $29 to $9 on 14 Oct.)
 - **Still open:** the Swiss Ephemeris license decision, and whether the AI's writing is as specific as the hand-written sample. Run `scripts/check_writer.py` and read the output before launch, and turn on `REVIEW_BOOKS` for the first orders.
 - **The forecast itself is unchanged** (about 65% chance of under $1k/month at 12 months). It now depends almost entirely on distribution: `docs/LAUNCH_PLAN.md` is the plan, and the stats page will show by late December whether the kill rule triggers.

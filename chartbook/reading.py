@@ -16,6 +16,7 @@ Expect very roughly $0.30-$0.80 per full book with the default model.
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 
 from pydantic import BaseModel, ConfigDict, ValidationError
@@ -23,7 +24,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from .chart import SIGNS as _SIGN_NAMES
 from .facts import Fact
 
-MODEL = "claude-opus-5-5"
+MODEL = os.environ.get("WRITER_MODEL", "claude-opus-5-5")  # e.g. claude-sonnet-5-5 to halve the AI cost
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
 FOCUS_AREAS = {"love", "career", "growth"}

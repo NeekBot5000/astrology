@@ -1,6 +1,6 @@
 # Brand name shortlist
 
-"Birth Sky Books" is a placeholder. The name is hard to change once a domain, social accounts and reviews are attached to it, so take a few days over it. **I can't check whether any of these names is free.** Every name below is *unverified* until you check it yourself (steps at the end), and the trademark with a lawyer.
+"Skyprint" is a placeholder. The name is hard to change once a domain, social accounts and reviews are attached to it, so take a few days over it. **I can't check whether any of these names is free.** Every name below is *unverified* until you check it yourself (steps at the end), and the trademark with a lawyer.
 
 ## What the name has to do
 - **Say "gift" and "personal", not "app".** Buyers are mostly people buying for someone else.
@@ -23,16 +23,16 @@
 | **Natal Notes** | Descriptive, alliterative | Yes / yes | Medium | "Natal" (birth) chart, "notes". In German "Natal" also means the Brazilian city and the South African province. | Clear to astrology fans, jargon to gift-buyers. |
 | **Zenith & Page** | Compound ("& Co" style) | Yes / yes | Medium | "Zenith" (highest point of the sky) plus "page". Feels like a stationery brand. | Ampersand names are awkward in domains and handles. |
 | **Your Sky Book** | Descriptive | Yes / yes | Low-medium | Says exactly what it is. | Very hard to protect as a trademark; fine as a tagline. |
-| **Birth Sky Books** | Descriptive (current) | Yes / yes | Medium | Clear and already on every page. | Safe fallback if nothing else clears the checks. |
+| **Skyprint** | Descriptive (current) | Yes / yes | Medium | Clear and already on every page. | Safe fallback if nothing else clears the checks. |
 
-**Recommendation:** check **Skyprint** first, then **Born Beneath**, then **Starwritten**. Keep "Birth Sky Books" as the fallback. Whichever wins, "A birth-chart book written for one person" stays the tagline.
+**Recommendation:** check **Skyprint** first, then **Born Beneath**, then **Starwritten**. Keep "Skyprint" as the fallback. Whichever wins, "A birth-chart book written for one person" stays the tagline.
 
 ## Brand voice
 The brand sounds like a well-read friend who happens to know astrology: warm, specific and honest, never mystical or salesy. It talks to gift-givers as thoughtful people with little time, and to astrology fans as people who know the difference between a real chart and a horoscope column. Every piece of writing should leave the reader feeling *seen* and *not tricked*: the book is about someone real, and the price is exactly what it says.
 
 | Do | Don't |
 |---|---|
-| Name the real thing: "your Moon in Leo, 2nd house", "one payment of $29". | Use vague mysticism: "the universe is guiding you", "cosmic energy". |
+| Name the real thing: "your Moon in Leo, 2nd house", "one payment of $9". | Use vague mysticism: "the universe is guiding you", "cosmic energy". |
 | Say it plainly and kindly, including the tensions in a chart. | Flatter everyone or promise outcomes: no predictions about love, money or health. |
 | Be honest about how it works (calculated sky, written by AI, checked automatically). | Use urgency tricks or hype: "only 3 left!", "limited time", fake countdowns. |
 

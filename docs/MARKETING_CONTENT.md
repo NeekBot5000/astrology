@@ -15,7 +15,7 @@ Everything here is drafted for the Christmas pre-sale in `LAUNCH_PLAN.md`. Swap 
 |---|---|---|---|
 | 1 | "Every astrology app told me the same thing. This one shows its receipts." | Slow scroll of a chapter page; zoom on the ✦ line "Venus in Gemini, 12th house" | "Every paragraph says which part of your chart it's from. Link in bio." |
 | 2 | "Gift idea for the friend who's obsessed with her rising sign." | Cover with name → dedication page → a chapter | "Made from her exact birth time and place. PDF in minutes." |
-| 3 | "Astrology apps and surprise subscriptions: name a more iconic duo." | Text over the price section | "One book, $29, once. Nothing to cancel." |
+| 3 | "Astrology apps and surprise subscriptions: name a more iconic duo." | Text over the price section | "One book, $9, once. Nothing to cancel." |
 | 4 | "Tell me your birthday and I'll tell you your Moon sign." (comment-bait) | Free chart tool on screen with a commenter's details (with permission) | "Free chart wheel at the link. The book goes much deeper." |
 | 5 | "What your 12th house actually means, in 20 seconds." | The chart wheel, house 12 highlighted | "Your book explains every house in your chart." |
 | 6 | "I asked for a birth-chart reading that wasn't generic. Here's page 11." | Read one paragraph aloud | "It quotes the placement every time. That's the whole idea." |
@@ -59,7 +59,7 @@ Use the images in `marketing/` and make variations. Link every pin with `?src=pi
 | Gift for mom who loves astrology | Her birth chart turned into a keepsake book. Print it at home or at a copy shop. |
 | Free birth chart wheel | See the sky on the day you were born. Free tool, nothing saved. |
 | What is a birth chart? | A snapshot of the sky when you were born: Sun, Moon, rising sign and every planet. |
-| One price, no subscription | A personalized astrology book for $29, once. 14-day refund if it doesn't feel personal. |
+| One price, no subscription | A personalized astrology book for $9, once. 14-day refund if it doesn't feel personal. |
 
 ## 4. Emails to people who reserved a copy
 Export the list from the stats page (CSV). Send from your own email account; these people asked to hear about the launch and nothing else.
@@ -71,7 +71,7 @@ Export the list from the stats page (CSV). Send from your own email account; the
 >
 > {Order link from the CSV}
 >
-> It's $29, once. The PDF arrives within minutes and prints like a paperback. If it doesn't feel personal, you get a full refund within 14 days.
+> It's $9, once. The PDF arrives within minutes and prints like a paperback. If it doesn't feel personal, you get a full refund within 14 days.
 >
 > Thanks for being one of the first,
 > {Your name}, {Brand}

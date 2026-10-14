@@ -1,4 +1,4 @@
-<title>Birth Sky Books</title>
+<title>Skyprint</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
@@ -106,7 +106,7 @@ footer p + p { margin-top: 8px; }
 <header class="band">
   <div class="inner hero">
     <div style="display:grid; gap:20px">
-      <p class="eyebrow">Birth Sky Books</p>
+      <p class="eyebrow">Skyprint</p>
       <h1>A birth-chart book written for one person</h1>
       <p class="lede">We calculate the real sky at the moment someone was born, then write a 22-page book about them where every paragraph names the part of their chart it comes from. A gift that feels personal, delivered as a PDF.</p>
       <div class="actions">
@@ -115,7 +115,7 @@ footer p + p { margin-top: 8px; }
       </div>
       <p class="small" id="dl-status-hero" role="status"></p>
     </div>
-    <img class="cover" src="pages/page-1.png" alt="Cover of a sample book titled Maya's Birth Sky, with her chart wheel in gold on midnight blue">
+    <img class="cover" src="pages/page-1.png" alt="Cover of a sample book titled Maya's Skyprint, with her chart wheel in gold on midnight blue">
   </div>
 </header>
 
@@ -211,7 +211,7 @@ footer p + p { margin-top: 8px; }
   <div class="inner">
     <p class="eyebrow">Coming this November</p>
     <h2 id="promise-h">One book, one honest price</h2>
-    <div class="price">$29</div>
+    <div class="price">$9</div>
     <div class="promises">
       <div><h3>Pay once</h3><p class="muted">No subscription and no account. There's nothing to cancel.</p></div>
       <div><h3>14-day refund</h3><p class="muted">If the book doesn't feel personal, you get your money back. No forms.</p></div>
@@ -229,7 +229,7 @@ footer p + p { margin-top: 8px; }
 <footer class="band">
   <div class="inner">
     <p class="small">Books are for entertainment and self-reflection, not predictions or professional advice. Planet positions in the free chart come from Astronomy Engine; the books use the Swiss Ephemeris. City data: GeoNames (CC BY 4.0).</p>
-    <p class="small">Birth Sky Books is a working name.</p>
+    
   </div>
 </footer>
 
@@ -362,7 +362,7 @@ footer p + p { margin-top: 8px; }
       var res = await fetch("maya-sample.pdf");
       if (!res.ok) throw new Error("missing file");
       var blob = await res.blob();
-      await downloads.save({ filename: "birth-sky-sample-book.pdf", data: blob });
+      await downloads.save({ filename: "skyprint-sample-book.pdf", data: blob });
       status.textContent = "Saved.";
     } catch (e) {
       status.textContent = e && e.code === "declined" ? "" : "The download didn't start. Try again in a moment.";
@@ -412,7 +412,7 @@ footer p + p { margin-top: 8px; }
     g.fillStyle = "#ece6d6"; g.font = 'italic 400 36px "Source Serif 4", Georgia, serif';
     g.fillText("Every planet, every angle, one book written for you.", 540, 1620);
     g.fillStyle = "#cdbb8a"; g.font = '400 32px "Source Serif 4", Georgia, serif';
-    g.fillText("Free chart at Birth Sky Books", 540, 1780);
+    g.fillText("Free chart at Skyprint", 540, 1780);
     return await new Promise(function (resolve) { c.toBlob(resolve, "image/png"); });
   }
   $("share-img").addEventListener("click", async function () {
