@@ -111,7 +111,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
 
     def page(request: Request, name: str, status_code: int = 200, **ctx) -> HTMLResponse:
         ctx.update(brand=BRAND, price=settings.price_text, payments=settings.payments_enabled,
-                   support_email=settings.support_email, keep_days=settings.keep_days)
+                   support_email=settings.support_email, keep_days=settings.keep_days, base_url=settings.base_url)
         return templates.TemplateResponse(request, name, ctx, status_code=status_code)
 
     @app.middleware("http")

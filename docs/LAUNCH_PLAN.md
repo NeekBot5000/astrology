@@ -101,7 +101,9 @@ Leave about 1 in 5 slots open for reacting to whatever gets comments.
 |---|---|---|
 | Real domain + live Stripe + Anthropic key | Must | Owner decision: brand name first |
 | 6 launch videos | Must | Phone screen recordings of the sample PDF are enough |
-| 10 Pinterest pins | Must | Export pages from `samples/maya-sample.pdf` |
+| 10 Pinterest pins | Must | 3 designs ready in `marketing/` (`pin-*.png`); make variations by editing `scripts/make_marketing_images.py` |
+| Instagram posts | Nice | 2 ready in `marketing/` (`ig-*.png`) |
+| Link preview card | Done | `marketing/og-card.png`, used automatically when the site is shared |
 | Book cover mockup photo | Nice | A printed copy on a table looks more real than a screen |
 | 3-5 real customer quotes | Nice | Ask the first buyers; add to the landing page |
 
