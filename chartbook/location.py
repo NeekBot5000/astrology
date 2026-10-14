@@ -6,7 +6,9 @@ so it needs an internet connection. The time-zone lookup works offline.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
+from functools import lru_cache
 
 from timezonefinder import TimezoneFinder
 
@@ -28,11 +30,15 @@ def timezone_at(latitude: float, longitude: float) -> str:
     return tz
 
 
+@lru_cache(maxsize=2048)
 def lookup_place(query: str) -> Place:
+    """Look up a place name. Results are cached, as OpenStreetMap's usage policy asks."""
     from geopy.geocoders import Nominatim
 
-    geocoder = Nominatim(user_agent="chartbook-birth-chart")
-    hit = geocoder.geocode(query, language="en")
+    # The policy asks for an identifying user agent with a contact address.
+    contact = os.environ.get("SUPPORT_EMAIL", "")
+    geocoder = Nominatim(user_agent=f"birth-chart-book/1.0 ({contact})" if contact else "birth-chart-book/1.0", timeout=10)
+    hit = geocoder.geocode(query.strip(), language="en")
     if hit is None:
         raise LookupError(f"Could not find a place called {query!r}")
     return Place(hit.address, hit.latitude, hit.longitude, timezone_at(hit.latitude, hit.longitude))

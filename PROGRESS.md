@@ -13,10 +13,12 @@ Newest entries go at the top. Each entry: date, what was done, what was verified
 - Optional review mode (`REVIEW_BOOKS=true`): you read and approve each book at `/admin/review` before the customer gets it, with a "rewrite" button. Failed books show on the stats page with a retry button.
 - Stripe receipts include the link to the customer's download page, so a closed tab doesn't lose the book (the site sends no email of its own yet).
 - AI cost is recorded per book and averaged on the stats page.
+- Books interrupted by a restart or deploy resume automatically when the server starts.
+- Marketing images in `marketing/` (3 Pinterest pins, 2 Instagram posts, link preview card), made from the sample book by `scripts/make_marketing_images.py`.
 - `scripts/check_writer.py`: once you have an API key, writes 3 test chapters for tricky charts (about $0.25) so you can check quality before launch.
 
 **Verified**
-- 43 automated tests pass (the PDF test needs Chromium): chart accuracy, writer validation and retry using a fake AI, the full paid flow using a fake Stripe (payment → writing → download → delete), webhook signature check, no double writing, purge rules, link tracking.
+- 44 automated tests pass (the PDF test needs Chromium): chart accuracy, writer validation and retry using a fake AI, the full paid flow using a fake Stripe (payment → writing → download → delete), webhook signature check, no double writing, purge rules, link tracking.
 - Accessibility: automated axe-core scan clean on all pages; contrast fixed (input borders, focus ring, wheel labels); keyboard order checked; no sideways scrolling at 320 px or 200% text.
 - A security review of the whole branch found no high-confidence issues. A code review found 10 bugs (e.g. a reservation could be erased mid-checkout, paid sales vanished from stats after deletion, rate limit broken behind a hosting proxy); all fixed with tests.
 

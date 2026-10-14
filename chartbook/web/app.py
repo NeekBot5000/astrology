@@ -12,8 +12,10 @@ import hmac
 import io
 import logging
 import re
+import threading
 import time as _time
 from collections import defaultdict, deque
+from contextlib import asynccontextmanager
 from datetime import date, time
 from pathlib import Path
 
@@ -91,7 +93,20 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
 
         stripe_client = stripe.StripeClient(settings.stripe_secret_key)
 
-    app = FastAPI(title=BRAND, docs_url=None, redoc_url=None, openapi_url=None)
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        # Restart books that were interrupted, e.g. by a deploy or crash while writing.
+        stuck = store.with_status("writing") + store.with_status("paid")
+        for order in stuck:
+            store.update(order.id, status="paid")
+            threading.Thread(
+                target=make_book, args=(store, order.id, writer_client, settings.data_dir, settings.review_books), daemon=True
+            ).start()
+        if stuck:
+            log.warning("Resumed %d unfinished book(s)", len(stuck))
+        yield
+
+    app = FastAPI(title=BRAND, docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
     app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
     app.mount("/fonts", StaticFiles(directory=HERE.parent / "static/fonts"), name="fonts")
     templates = Jinja2Templates(directory=HERE / "templates")
