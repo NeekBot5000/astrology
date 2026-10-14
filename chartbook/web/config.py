@@ -20,6 +20,17 @@ class Settings:
     support_email: str
     admin_token: str | None = None
     review_books: bool = False  # owner approves each book before the customer can download it
+    # Business details shown on the legal pages. Until legal_name and legal_address are set,
+    # those pages show a visible "draft" banner and placeholders.
+    legal_name: str | None = None
+    legal_address: str | None = None
+    legal_country: str | None = None  # whose law governs the terms, e.g. "Germany"
+    vat_id: str | None = None
+    legal_effective_date: str | None = None
+
+    @property
+    def legal_ready(self) -> bool:
+        return bool(self.legal_name and self.legal_address and self.legal_country)
 
     @property
     def payments_enabled(self) -> bool:
@@ -46,4 +57,9 @@ def load_settings() -> Settings:
         support_email=env.get("SUPPORT_EMAIL", "support@example.com"),
         admin_token=env.get("ADMIN_TOKEN") or None,
         review_books=env.get("REVIEW_BOOKS", "").lower() in ("1", "true", "yes"),
+        legal_name=env.get("LEGAL_NAME") or None,
+        legal_address=env.get("LEGAL_ADDRESS") or None,
+        legal_country=env.get("LEGAL_COUNTRY") or None,
+        vat_id=env.get("VAT_ID") or None,
+        legal_effective_date=env.get("LEGAL_EFFECTIVE_DATE") or None,
     )

@@ -120,8 +120,9 @@
         <textarea id="dedication" name="dedication" maxlength="300" placeholder="Happy birthday, Sam. Thought you'd recognize yourself in this. Love, Alex">{{ form.dedication or '' }}</textarea>
       </div>
       <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <input type="hidden" name="src" value="{{ form.src or '' }}">
       <button class="btn btn-dark" type="submit">Show the free preview</button>
-      <p class="small">We use the place only to look up its coordinates and time zone.</p>
+      <p class="small">If these are someone else's details, please only enter them if you know they'd be happy to receive the book. We use them only to make it, and delete them afterwards (<a href="/privacy">privacy policy</a>).</p>
     </form>
   </div>
 </section>

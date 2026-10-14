@@ -1,0 +1,64 @@
+{% extends "legal_base.html" %}
+{% block legal %}
+<p>This policy explains what personal data we collect when you use {{ brand }}, why, who we share it with, how long we keep it, and your rights. We collect as little as we can and delete it quickly.</p>
+
+<h2 id="controller">1. Who is responsible</h2>
+<p>The controller of your data (the party that decides how it is used) is {{ legal.name }}, {{ legal.address }}, email {{ support_email }}. We have not appointed a data protection officer, as the law doesn't require one for a business of our size. [If you sell to people in the EU but are based outside it, name your EU representative here.]</p>
+
+<h2 id="what">2. What we collect and why</h2>
+<div class="table-wrap">
+<table class="legal-table">
+  <thead><tr><th scope="col">Data</th><th scope="col">Why</th><th scope="col">Legal basis (GDPR)</th></tr></thead>
+  <tbody>
+    <tr><td>First name, birth date, birth time (optional), birth place, focus areas, gift note</td><td>To calculate the chart, show the free preview and make the book</td><td>Taking steps at your request before a contract, and performing the contract (Art. 6(1)(b))</td></tr>
+    <tr><td>Coordinates and time zone of the birth place</td><td>Looked up from the place name to calculate the chart</td><td>As above</td></tr>
+    <tr><td>Email address (optional when buying; required to reserve a copy)</td><td>To send the receipt and download link, or to tell you when ordering opens</td><td>Performing the contract, or your consent when reserving (Art. 6(1)(b) and (a))</td></tr>
+    <tr><td>Order records: what was bought, when, price, Stripe payment reference, when you agreed to the terms</td><td>Accounting and tax records, handling refunds and disputes</td><td>Legal obligation (Art. 6(1)(c)) and our legitimate interest in defending claims (Art. 6(1)(f))</td></tr>
+    <tr><td>Your IP address and browser details, briefly</td><td>To deliver the website, prevent abuse (for example limiting how many previews one address can start) and keep it secure</td><td>Our legitimate interest in running a secure website (Art. 6(1)(f))</td></tr>
+    <tr><td>Anonymous visit counts per marketing link (for example "came from a video")</td><td>To know which of our posts bring visitors</td><td>Our legitimate interest; the counts can't identify you</td></tr>
+  </tbody>
+</table>
+</div>
+<p><strong>Birth details are not "sensitive data"</strong> in the legal sense, but we treat them carefully because they are personal. We never use them for advertising, never sell them, and never use them to train AI models.</p>
+<p><strong>Details about someone else.</strong> If you order a book as a gift, the birth details are about the recipient. We use them only to make that book and delete them on the same schedule. The recipient can ask us to delete them at any time.</p>
+
+<h2 id="cookies">3. Cookies</h2>
+<p>We don't use cookies, advertising trackers or third-party analytics on our website. Stripe's payment page may set its own cookies to process the payment and prevent fraud; see Stripe's privacy policy. Because we set no cookies that need consent, we don't show a cookie banner.</p>
+
+<h2 id="processors">4. Who we share data with</h2>
+<p>We use a few service providers ("processors") who handle data on our behalf, under contracts that oblige them to protect it:</p>
+<ul>
+  <li><strong>Stripe</strong> (payments): your email, payment details and the order amount. Stripe is also an independent controller for fraud prevention and its own legal duties.</li>
+  <li><strong>Anthropic</strong> (AI writing): the calculated chart (planet positions and the first name). Not your email, and not your exact birth place. Data sent through Anthropic's commercial API is not used to train its models.</li>
+  <li><strong>OpenStreetMap Foundation</strong> (Nominatim place search): the place name you typed, to find its coordinates.</li>
+  <li><strong>[Your hosting provider, e.g. Render]</strong>: stores the order database and book files on our behalf.</li>
+</ul>
+<p>Some of these providers are in the United States. Where data leaves the EU or UK, it is protected by the EU-US Data Privacy Framework where the provider is certified, or by the European Commission's standard contractual clauses.</p>
+<p>We share data with authorities only when the law requires it.</p>
+
+<h2 id="retention">5. How long we keep it</h2>
+<ul>
+  <li>Free preview that doesn't become an order: deleted after 2 days.</li>
+  <li>Reserved copy: deleted 120 days after you reserve, or when you cancel.</li>
+  <li>Finished book and the birth details behind it: deleted {{ keep_days }} days after the book is ready, or immediately when you press "erase" on your download page.</li>
+  <li>Order and payment records needed for tax and accounting: kept for the period tax law requires (often up to 10 years), without birth details.</li>
+  <li>Server logs: kept for up to 14 days.</li>
+</ul>
+
+<h2 id="rights">6. Your rights</h2>
+<p>You can ask us to give you a copy of your data, correct it, delete it, restrict how we use it, or send it to you in a portable format. You can object to uses based on our legitimate interests, and withdraw consent at any time (this doesn't affect what we did before). Email {{ support_email }}; we answer within one month. You can delete a book and its details yourself from the download page.</p>
+<p>You also have the right to complain to a data protection supervisory authority, for example the one in the country where you live or work. {% if legal.country %}Ours is the authority responsible in {{ legal.country }}.{% else %}[Name your supervisory authority here.]{% endif %}</p>
+<p><strong>California residents:</strong> we do not sell or share personal information for cross-context behavioural advertising, and we don't use sensitive personal information to infer characteristics about you. You have the rights to know, delete and correct your information, and we won't treat you differently for using them.</p>
+
+<h2 id="automated">7. Automated processing</h2>
+<p>The book's text is written automatically by an AI model from your chart. This is the product itself, not a decision about you: it has no legal or similarly significant effect on you.</p>
+
+<h2 id="security">8. Security</h2>
+<p>Our website uses encrypted connections (HTTPS). Order links contain a long random code that can't be guessed. We keep only what is needed and delete it on the schedule above.</p>
+
+<h2 id="children">9. Children</h2>
+<p>The shop is for adults. We don't knowingly collect data from children under 16 without a parent's or guardian's permission. If you believe a child has given us their details, email us and we will delete them.</p>
+
+<h2 id="changes">10. Changes</h2>
+<p>We'll update this policy when our service or the law changes, and show the date at the top of the page.</p>
+{% endblock %}

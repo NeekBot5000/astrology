@@ -8,7 +8,6 @@ STARTED: 04:57 UTC   ENDS: 12:57 UTC (8 hours; no duration was given)
 - "Publish" therefore means: a working pre-sale page published as a private claude.ai Artifact. The owner decides whether to share the link.
 
 ## QUEUE
-[ ] L. (owner request 05:4x) Terms of Service, privacy policy, refund policy, withdrawal rights, legal notice, checkout consent, legal checklist
 [ ] 4. Brand-name shortlist with screening notes (owner decides; I can't check trademarks or domains)
 [ ] 5. Marketing content pack: 10 short-video scripts, Reddit post drafts, Pinterest captions, launch email to the waitlist
 [ ] 6. Update LAUNCH_PLAN and DEPLOY for the Artifact-first route
@@ -23,5 +22,11 @@ STARTED: 04:57 UTC   ENDS: 12:57 UTC (8 hours; no duration was given)
     time zones identical to Python on 10 historical/DST cases; desktop + phone render, no horizontal scroll. — 05:50
     Dropped: Artifact sign-up form (Artifacts only store data for signed-in claude.ai viewers, so the public can't reserve there),
     and therefore the sign-up export script.
+[x] Legal pages (owner request): /terms, /privacy, /refunds (incl. EU/UK withdrawal + model form), /legal-notice (Impressum),
+    /policies hub; draft banner + [placeholders] until LEGAL_NAME/ADDRESS/COUNTRY set; required checkout consent box
+    (terms + immediate delivery + withdrawal acknowledgement), consent time saved on order, sent to Stripe, shown on receipt;
+    site now sets NO cookies (link tag moved to hidden form field); AI disclosure + personal-use line in the book;
+    docs/legal/LEGAL_CHECKLIST.md (tax, registration, Stripe restricted-business risk, DPAs, licences, facts to verify).
+    Verified: 52 tests pass (9 new), phone screenshots of terms + checkout. — 06:05
 
 ## PARKED

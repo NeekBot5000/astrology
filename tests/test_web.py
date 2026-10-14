@@ -15,6 +15,7 @@ from chartbook.web.config import load_settings
 PORTLAND = Place("Portland, Oregon, United States", 45.5152, -122.6784, "America/Los_Angeles")
 HAS_BROWSER = bool(os.environ.get("CHROMIUM_PATH"))
 
+AGREE = {"agree": "true"}  # the terms / immediate-delivery consent box at checkout
 FORM = {"name": "Sam", "birth_date": "1994-05-17", "birth_time": "08:40", "place": "Portland", "focus": ["love"]}
 
 
@@ -120,11 +121,11 @@ def test_paid_flow_writes_book(tmp_path, monkeypatch):
         # Without a browser we still test everything up to rendering the PDF.
         monkeypatch.setattr("chartbook.web.pipeline.render_pdf", lambda html, out: (out.write_bytes(b"%PDF-fake"), out)[1])
     order_id = start_preview(client)
-    r = client.post(f"/p/{order_id}/checkout", data={"email": "sam@example.com"}, follow_redirects=False)
+    r = client.post(f"/p/{order_id}/checkout", data={"email": "sam@example.com", **AGREE}, follow_redirects=False)
     assert r.status_code == 303 and r.headers["location"].startswith("https://checkout.stripe.test/")
     params = stripe.created[0]
     assert params["line_items"][0]["price_data"]["unit_amount"] == 2900
-    assert params["metadata"] == {"order_id": order_id}
+    assert params["metadata"]["order_id"] == order_id
 
     # Returning from Stripe triggers writing (the webhook might be slower).
     r = client.get(f"/order/{order_id}?session_id=cs_test_1")
@@ -151,7 +152,7 @@ def test_webhook_rejects_bad_signature_and_marks_paid(tmp_path, monkeypatch):
     client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
     monkeypatch.setattr("chartbook.web.pipeline.render_pdf", lambda html, out: (out.write_bytes(b"%PDF-fake"), out)[1])
     order_id = start_preview(client)
-    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
+    client.post(f"/p/{order_id}/checkout", data=AGREE, follow_redirects=False)
     body = json.dumps({"metadata": {"order_id": order_id}})
     assert client.post("/stripe/webhook", content=body, headers={"stripe-signature": "bad"}).status_code == 400
     assert app.state.store.get(order_id).status == "awaiting_payment"
@@ -163,7 +164,7 @@ def test_unpaid_return_does_not_start_writing(tmp_path, monkeypatch):
     client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
     stripe.paid = False
     order_id = start_preview(client)
-    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
+    client.post(f"/p/{order_id}/checkout", data=AGREE, follow_redirects=False)
     client.get(f"/order/{order_id}?session_id=cs_test_1")
     assert app.state.store.get(order_id).status == "awaiting_payment" and writer.calls == 0
     # A forged session id is ignored too.
@@ -176,7 +177,7 @@ def test_writer_failure_lands_on_order(tmp_path, monkeypatch):
     client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
     writer.beta.messages.create = lambda **kw: SimpleNamespace(stop_reason="refusal", content=[])
     order_id = start_preview(client)
-    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
+    client.post(f"/p/{order_id}/checkout", data=AGREE, follow_redirects=False)
     r = client.get(f"/order/{order_id}?session_id=cs_test_1")
     assert app.state.store.get(order_id).status == "failed"
     assert "Something went wrong" in client.get(f"/order/{order_id}").text
@@ -238,7 +239,7 @@ def test_download_filename_is_sanitized(tmp_path, monkeypatch):
     client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
     monkeypatch.setattr("chartbook.web.pipeline.render_pdf", lambda html, out: (out.write_bytes(b"%PDF-fake"), out)[1])
     order_id = start_preview(client, name='Zoë "Z" Ann')
-    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
+    client.post(f"/p/{order_id}/checkout", data=AGREE, follow_redirects=False)
     client.get(f"/order/{order_id}?session_id=cs_test_1")
     r = client.get(f"/order/{order_id}/book.pdf")
     assert 'filename="Zo-Z-Ann-birth-sky.pdf"' in r.headers["content-disposition"]
@@ -247,8 +248,9 @@ def test_download_filename_is_sanitized(tmp_path, monkeypatch):
 def test_link_tags_credit_visits_and_orders(tmp_path, monkeypatch):
     monkeypatch.setenv("ADMIN_TOKEN", "tok")
     client, app, *_ = make_client(tmp_path, monkeypatch)
-    client.get("/?src=TikTok")  # tag is normalized and remembered in a cookie
-    order_id = start_preview(client)
+    page = client.get("/?src=TikTok")  # tag is normalized and carried in a hidden form field, not a cookie
+    assert 'name="src" value="tiktok"' in page.text and "set-cookie" not in page.headers
+    order_id = start_preview(client, src="tiktok")
     client.post(f"/p/{order_id}/checkout", data={"email": "a@b.co"})
     assert app.state.store.get(order_id).source == "tiktok"
     client.get("/", headers={"user-agent": "Googlebot/2.1"})  # bots aren't counted
@@ -269,7 +271,7 @@ def test_preorder_export_and_later_purchase(tmp_path, monkeypatch):
     # Later, payments are switched on: the same link now leads to checkout.
     paid_client, paid_app, stripe, _ = make_client(tmp_path, monkeypatch, payments=True)
     assert "Continue to secure payment" in paid_client.get(f"/p/{order_id}").text
-    r = paid_client.post(f"/p/{order_id}/checkout", data={"email": ""}, follow_redirects=False)
+    r = paid_client.post(f"/p/{order_id}/checkout", data={"email": "", **AGREE}, follow_redirects=False)
     order = paid_app.state.store.get(order_id)
     assert r.status_code == 303 and order.status == "awaiting_payment"
     assert order.email == "sam@example.com"  # blank field keeps the reservation email
@@ -298,7 +300,7 @@ def test_paid_count_survives_erasing(tmp_path, monkeypatch):
     client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
     monkeypatch.setattr("chartbook.web.pipeline.render_pdf", lambda html, out: (out.write_bytes(b"%PDF-fake"), out)[1])
     order_id = start_preview(client)
-    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
+    client.post(f"/p/{order_id}/checkout", data=AGREE, follow_redirects=False)
     client.get(f"/order/{order_id}?session_id=cs_test_1")
     client.post(f"/order/{order_id}/delete")
     assert app.state.store.paid_count() == 1
@@ -330,8 +332,8 @@ def test_review_gate_holds_book_until_approved(tmp_path, monkeypatch):
     client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
     monkeypatch.setattr("chartbook.web.pipeline.render_pdf", lambda html, out: (out.write_bytes(b"%PDF-fake"), out)[1])
     order_id = start_preview(client)
-    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
-    assert stripe.created[0]["payment_intent_data"]["description"].endswith(f"/order/{order_id}")
+    client.post(f"/p/{order_id}/checkout", data=AGREE, follow_redirects=False)
+    assert f"/order/{order_id} " in stripe.created[0]["payment_intent_data"]["description"]
     client.get(f"/order/{order_id}?session_id=cs_test_1")  # starts writing in the background
     assert app.state.store.get(order_id).status == "review"
     assert "final read-through" in client.get(f"/order/{order_id}").text
@@ -367,3 +369,54 @@ def test_interrupted_books_resume_on_startup(tmp_path, monkeypatch):
                 break
             _t.sleep(0.1)
         assert c2.app.state.store.get(order_id).status == "ready"
+
+
+def test_checkout_requires_terms_consent_and_records_it(tmp_path, monkeypatch):
+    client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
+    order_id = start_preview(client)
+    page = client.get(f"/p/{order_id}")
+    assert 'name="agree"' in page.text and "right of withdrawal ends" in page.text
+    r = client.post(f"/p/{order_id}/checkout", data={"email": "a@b.co"}, follow_redirects=False)
+    assert r.status_code == 422 and "tick the box" in r.text and stripe.created == []
+    r = client.post(f"/p/{order_id}/checkout", data={"email": "a@b.co", **AGREE}, follow_redirects=False)
+    assert r.status_code == 303
+    order = app.state.store.get(order_id)
+    assert order.consent_at and stripe.created[0]["metadata"]["terms_accepted_at"] == order.consent_at
+    assert "right of withdrawal ends" in stripe.created[0]["payment_intent_data"]["description"]
+
+
+def test_preview_error_text_cannot_be_injected_from_the_url(tmp_path, monkeypatch):
+    client, *_ = make_client(tmp_path, monkeypatch, payments=True)
+    order_id = start_preview(client)
+    r = client.get(f"/p/{order_id}?error=Call+this+number+now")
+    assert "Call this number now" not in r.text
+
+
+@pytest.mark.parametrize("path,needle", [
+    ("/terms", "Entertainment and self-reflection only"),
+    ("/privacy", "Who we share data with"),
+    ("/refunds", "Model withdrawal form"),
+    ("/legal-notice", "Provider"),
+    ("/policies", "Our policies"),
+])
+def test_legal_pages_render_with_draft_banner_until_configured(tmp_path, monkeypatch, path, needle):
+    for var in ("LEGAL_NAME", "LEGAL_ADDRESS", "LEGAL_COUNTRY"):
+        monkeypatch.delenv(var, raising=False)
+    client, *_ = make_client(tmp_path, monkeypatch)
+    r = client.get(path)
+    assert r.status_code == 200 and needle in r.text
+    if path != "/policies":
+        assert "draft-banner" in r.text and "[Your full legal name" in r.text
+
+
+def test_legal_pages_use_business_details(tmp_path, monkeypatch):
+    monkeypatch.setenv("LEGAL_NAME", "Sam Example")
+    monkeypatch.setenv("LEGAL_ADDRESS", "Musterstrasse 1, 10115 Berlin, Germany")
+    monkeypatch.setenv("LEGAL_COUNTRY", "Germany")
+    monkeypatch.setenv("LEGAL_EFFECTIVE_DATE", "2026-11-02")
+    client, *_ = make_client(tmp_path, monkeypatch)
+    notice = client.get("/legal-notice").text
+    assert "draft-banner" not in notice and "Musterstrasse 1<br>10115 Berlin<br>Germany" in notice
+    terms = client.get("/terms").text
+    assert "governed by the law of Germany" in terms and "In effect from 2026-11-02" in terms
+    assert "consumer arbitration board" in terms  # shown for EU sellers

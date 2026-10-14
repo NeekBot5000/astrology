@@ -1,0 +1,62 @@
+{% extends "legal_base.html" %}
+{% block legal %}
+<p>These terms are the agreement between you and {{ legal.name }} ("we", "us") when you use this website or buy a book from it. We've written them in plain language. If you are a consumer, nothing here takes away rights that consumer law in your country gives you.</p>
+
+<h2 id="who">1. Who we are</h2>
+<p>{{ brand }} is run by {{ legal.name }}, {{ legal.address }}. Email: {{ support_email }}.{% if legal.vat_id %} VAT ID: {{ legal.vat_id }}.{% endif %} Full details are in our <a href="/legal-notice">legal notice</a>.</p>
+
+<h2 id="what">2. What we sell</h2>
+<p>We sell a personalized birth-chart book: a digital PDF file of about 20 to 25 pages, made for one person from the birth date, birth time (optional) and birth place you give us. It contains a chart wheel, a table of planet positions and seven written chapters.</p>
+<p>How a book is made: planet positions are calculated with astronomical software. The chapters are then written by an artificial-intelligence (AI) model, working only from those calculated positions, and checked automatically before the book is produced. Every book is different. We do not promise any particular wording, length or content beyond what is described on the website.</p>
+
+<h2 id="entertainment">3. Entertainment and self-reflection only</h2>
+<p>Astrology is not a science, and the book is not a prediction of the future. It is meant for entertainment and personal reflection. It is not medical, psychological, legal, financial or any other professional advice, and you should not make important decisions based on it. If you need advice, please talk to a qualified professional.</p>
+
+<h2 id="age">4. Who can buy</h2>
+<p>You must be at least 18 years old, or the age of legal majority where you live if that is higher, to buy a book. You can use the free chart preview at any age, but children under 16 should only enter details with a parent's or guardian's permission.</p>
+
+<h2 id="details">5. The details you give us</h2>
+<ul>
+  <li>Please enter birth details as accurately as you can. The book is calculated from exactly what you enter; a wrong date, time or place gives a different chart. We are not responsible for a book that is based on details that were entered incorrectly.</li>
+  <li><strong>Books about someone else.</strong> If you order a book as a gift, you will be giving us another person's first name and birth details. Please only do this if you know them, have a good reason to believe they would be happy to receive it, and would not mind us using their details for the purpose described in our <a href="/privacy">privacy policy</a>. If they ask us, we will delete their details.</li>
+  <li>Please don't enter anything offensive, unlawful or that belongs to someone else (for example, someone else's copyrighted text) in the name or the gift-note fields. We may refuse or cancel an order that does.</li>
+</ul>
+
+<h2 id="order">6. Ordering and the contract</h2>
+<p>The free preview is not an offer to sell. When you click the payment button and complete payment, you are making an offer to buy the book. The contract is formed when the payment is confirmed and we start making your book. The order page then shows its progress, and your payment receipt includes a link back to it.</p>
+<p>We may refuse or cancel an order, and refund you in full, if we can't make the book (for example, because of a technical fault) or if the order breaks these terms.</p>
+
+<h2 id="price">7. Price and payment</h2>
+<p>The price is shown on the website before you pay. It is a single, one-time payment{% if legal.vat_id %} and includes VAT or sales tax where it applies{% else %} [state here whether prices include VAT / sales tax]{% endif %}. There is no subscription, and we will never charge your card again without a new order from you.</p>
+<p>Payments are handled by Stripe. We never see or store your card details.</p>
+
+<h2 id="delivery">8. Delivery</h2>
+<p>The book is delivered as a PDF download on your order page, usually within a few minutes of payment. When we choose to read a book before releasing it, delivery can take up to 24 hours. Download links work for {{ keep_days }} days; after that the file is deleted, so please save your copy.</p>
+
+<h2 id="refunds">9. Refunds and your right of withdrawal</h2>
+<p>If the book doesn't feel personal, you can ask for a full refund within 14 days of buying it, for any reason. This is a voluntary promise we make on top of your legal rights. If you are a consumer in the EU or UK, you also have a legal right of withdrawal, explained, together with how it ends when the download is provided, on our <a href="/refunds">refunds and withdrawal page</a>.</p>
+<p>If your book can't be made, or is faulty (for example, the file is broken or the chart is calculated wrongly from the details you entered), we will fix it or refund you in full.</p>
+
+<h2 id="use">10. What you can do with the book</h2>
+<p>The book is yours to keep, read, print, and give as a gift to the person it was made for. You may share images of it on social media. You may not sell copies, offer them as part of a paid service, or present the text as your own professional reading. We, or our licensors, keep all intellectual-property rights in the book's design, layout and software. To the extent there are rights in the written text, we grant you a permanent, personal licence to use it as described here.</p>
+
+<h2 id="site">11. Using the website</h2>
+<p>Please don't misuse the website: for example, by trying to break or overload it, scraping it with automated tools, or using it to send spam. We may suspend access for anyone who does. We try to keep the site available but can't promise it will always work without interruption.</p>
+
+<h2 id="liability">12. Our responsibility to you</h2>
+<p>We are responsible for losses you suffer that are a foreseeable result of us breaking these terms or not using reasonable care. We are not responsible for losses that were not foreseeable, for business losses, or for decisions you make based on the book's content (see section 3). Our total responsibility for any order is limited to the price you paid for it.</p>
+<p>Nothing in these terms limits our responsibility where the law doesn't allow it to be limited, including for death or personal injury caused by negligence, for fraud, or for your statutory rights as a consumer.</p>
+
+<h2 id="privacy">13. Your personal data</h2>
+<p>How we use, keep and delete your details is explained in our <a href="/privacy">privacy policy</a>. In short: we use birth details only to make and deliver the book and delete them after {{ keep_days }} days.</p>
+
+<h2 id="changes">14. Changes to these terms</h2>
+<p>We may update these terms, for example when the law or our service changes. The version that applies to your order is the one shown on the website when you paid. We'll show the date a version takes effect at the top of this page.</p>
+
+<h2 id="law">15. Law and disputes</h2>
+<p>These terms are governed by the law of {{ legal.country }}. If you are a consumer, you also keep the protection of the mandatory consumer laws of the country where you live, and you can bring a claim in the courts of that country.</p>
+<p>If something goes wrong, please email us first at {{ support_email }}; we answer within 3 working days and will try to put it right.{% if legal.eu %} We are not obliged, and not willing, to take part in dispute resolution proceedings before a consumer arbitration board.{% endif %}</p>
+
+<h2 id="other">16. Other things</h2>
+<p>If a court finds part of these terms invalid, the rest still applies. If we don't enforce a right straight away, we can still enforce it later. These terms are available in English only.</p>
+{% endblock %}

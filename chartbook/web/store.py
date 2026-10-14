@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS orders (
     reserved_at TEXT,
     checkout_at TEXT,
     paid_at TEXT,
-    cost_cents INTEGER
+    cost_cents INTEGER,
+    consent_at TEXT
 );
 CREATE TABLE IF NOT EXISTS visits (
     day TEXT NOT NULL,
@@ -78,6 +79,7 @@ class Order:
     checkout_at: str | None = None  # when they last went to the payment page
     paid_at: str | None = None  # kept after erasing, so sales stay countable
     cost_cents: int | None = None  # AI writing cost for this book
+    consent_at: str | None = None  # when the buyer accepted the terms and immediate delivery (kept as evidence)
 
     @property
     def focus_set(self) -> set[str]:
@@ -96,7 +98,7 @@ class Store:
             # Add columns that older databases don't have yet.
             cols = {r["name"] for r in c.execute("PRAGMA table_info(orders)")}
             for col, kind in (("source", "TEXT"), ("reserved_at", "TEXT"), ("checkout_at", "TEXT"),
-                              ("paid_at", "TEXT"), ("cost_cents", "INTEGER")):
+                              ("paid_at", "TEXT"), ("cost_cents", "INTEGER"), ("consent_at", "TEXT")):
                 if col not in cols:
                     c.execute(f"ALTER TABLE orders ADD COLUMN {col} {kind}")
 

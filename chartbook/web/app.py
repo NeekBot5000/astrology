@@ -11,6 +11,7 @@ import csv
 import hmac
 import io
 import logging
+from html import escape as html_escape
 import re
 import threading
 import time as _time
@@ -79,6 +80,28 @@ def clean_tag(value: str | None) -> str:
     return re.sub(r"[^a-z0-9-]", "", (value or "").lower())[:30]
 
 
+EU_COUNTRIES = {
+    "austria", "belgium", "bulgaria", "croatia", "cyprus", "czechia", "czech republic", "denmark", "estonia", "finland",
+    "france", "germany", "greece", "hungary", "ireland", "italy", "latvia", "lithuania", "luxembourg", "malta",
+    "netherlands", "poland", "portugal", "romania", "slovakia", "slovenia", "spain", "sweden",
+}
+
+
+def legal_context(settings: Settings) -> dict:
+    """Business details for the legal pages, with visible [placeholders] for anything not configured."""
+    address = settings.legal_address or "[Street and number, postcode, city, country]"
+    return {
+        "ready": settings.legal_ready,
+        "name": settings.legal_name or "[Your full legal name or registered company name]",
+        "address": address,
+        "address_html": "<br>".join(html_escape(part.strip()) for part in address.split(",")),
+        "country": settings.legal_country or "[country]",
+        "vat_id": settings.vat_id,
+        "effective": settings.legal_effective_date,
+        "eu": (settings.legal_country or "").strip().lower() in EU_COUNTRIES,
+    }
+
+
 def _anthropic_client():
     import anthropic
 
@@ -124,9 +147,12 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
 
     landing = dict(chapter=sample_chapter, sample_sources=sample_sources, hero_wheel=hero_wheel, focus_labels=FOCUS_LABELS)
 
+    legal = legal_context(settings)
+
     def page(request: Request, name: str, status_code: int = 200, **ctx) -> HTMLResponse:
         ctx.update(brand=BRAND, price=settings.price_text, payments=settings.payments_enabled,
-                   support_email=settings.support_email, keep_days=settings.keep_days, base_url=settings.base_url)
+                   support_email=settings.support_email, keep_days=settings.keep_days, base_url=settings.base_url,
+                   legal=legal)
         return templates.TemplateResponse(request, name, ctx, status_code=status_code)
 
     @app.middleware("http")
@@ -145,13 +171,11 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request, src: str = ""):
         tag = clean_tag(src)
-        response = page(request, "index.html", form={}, errors=[], **landing)
         if not BOT_UA.search(request.headers.get("user-agent", "")):
-            store.count_visit(tag or clean_tag(request.cookies.get("src")) or "direct")
-        if tag:
-            # Remember which link brought this visitor, so a later purchase can be credited to it.
-            response.set_cookie("src", tag, max_age=30 * 86400, samesite="lax", httponly=True)
-        return response
+            store.count_visit(tag or "direct")
+        # The link tag travels in a hidden form field rather than a cookie, so the site sets no cookies at all
+        # and needs no cookie banner.
+        return page(request, "index.html", form={"src": tag}, errors=[], **landing)
 
     @app.post("/preview")
     def preview(
@@ -164,9 +188,10 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         focus: list[str] = Form([]),
         dedication: str = Form(""),
         website: str = Form(""),  # honeypot: humans never see or fill this
+        src: str = Form(""),
     ):
         form = dict(name=name, birth_date=birth_date, birth_time=birth_time, time_unknown=time_unknown,
-                    place=place, focus=focus, dedication=dedication)
+                    place=place, focus=focus, dedication=dedication, src=clean_tag(src))
         errors = []
         name = name.strip()
         if not 1 <= len(name) <= 40:
@@ -222,7 +247,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
             name=name, birth_date=bdate.isoformat(), birth_time=btime.strftime("%H:%M") if btime else None,
             place_name=found.name, latitude=found.latitude, longitude=found.longitude, tz=found.tz_name,
             focus=",".join(focus), dedication=dedication or None,
-            source=clean_tag(request.cookies.get("src")) or None,
+            source=clean_tag(src) or None,
         )
         return RedirectResponse(f"/p/{order.id}", status_code=303)
 
@@ -238,6 +263,9 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
 
     @app.get("/p/{order_id}", response_class=HTMLResponse)
     def show_preview(request: Request, order_id: str):
+        return render_preview(request, order_id)
+
+    def render_preview(request: Request, order_id: str, error: str | None = None, status_code: int = 200):
         order = _order_or_404(order_id)
         if order.status not in buyable_statuses():
             return RedirectResponse(f"/order/{order.id}", status_code=303)
@@ -254,16 +282,21 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         bdate = date.fromisoformat(order.birth_date)
         focus_text = " and ".join(FOCUS_LABELS[f].lower() for f in sorted(order.focus_set))
         return page(
-            request, "preview.html", order=order, wheel=render_wheel(chart, 600, f"{order.name}'s birth chart"),
+            request, "preview.html", status_code=status_code, error=error, order=order, wheel=render_wheel(chart, 600, f"{order.name}'s birth chart"),
             teasers=teasers, chart=chart, focus_text=focus_text, birth_date_text=f"{bdate.day} {bdate:%B %Y}",
             birth_time_text=time_text(time.fromisoformat(order.birth_time)) if order.birth_time else None,
         )
 
     @app.post("/p/{order_id}/checkout")
-    def checkout(order_id: str, email: str = Form("")):
+    def checkout(request: Request, order_id: str, email: str = Form(""), agree: bool = Form(False)):
         order = _order_or_404(order_id)
         if order.status not in buyable_statuses():
             return RedirectResponse(f"/order/{order.id}", status_code=303)
+        if settings.payments_enabled and not agree:
+            # EU/UK law: for instant digital delivery the buyer must agree to immediate supply and acknowledge
+            # that the withdrawal right ends on delivery. We also need acceptance of the terms.
+            return render_preview(request, order_id, error="Please tick the box to agree to the terms before paying.",
+                                  status_code=422)
         email = email.strip()[:200] or order.email  # keep the reservation email if the field is left blank
         if not settings.payments_enabled:
             # Pre-order mode: no payment taken yet; we just record interest.
@@ -271,6 +304,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
                 raise HTTPException(422, "An email address is needed to reserve a copy.")
             store.update(order.id, status="preorder", email=email, reserved_at=order.reserved_at or now().isoformat())
             return RedirectResponse(f"/order/{order.id}", status_code=303)
+        consent_at = now().isoformat()
         session = stripe_client.v1.checkout.sessions.create(params={
             "mode": "payment",
             "line_items": [{
@@ -284,12 +318,17 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
             "customer_email": email,
             "client_reference_id": order.id,
             # Shown on Stripe's emailed receipt, so the customer can always find the download page again.
-            "payment_intent_data": {"description": f"Your book: {settings.base_url}/order/{order.id}"},
-            "metadata": {"order_id": order.id},
+            # The second sentence confirms the customer's withdrawal consent on a durable medium (the receipt).
+            "payment_intent_data": {"description": (
+                f"Your book: {settings.base_url}/order/{order.id} . You agreed to the terms and asked us to make "
+                "the book immediately; your EU/UK right of withdrawal ends once it is available to download. "
+                "Our 14-day refund promise still applies.")},
+            "metadata": {"order_id": order.id, "terms_accepted_at": consent_at},
             "success_url": f"{settings.base_url}/order/{order.id}?session_id={{CHECKOUT_SESSION_ID}}",
             "cancel_url": f"{settings.base_url}/p/{order.id}",
         })
-        store.update(order.id, status="awaiting_payment", stripe_session=session.id, email=email, checkout_at=now().isoformat())
+        store.update(order.id, status="awaiting_payment", stripe_session=session.id, email=email,
+                     checkout_at=now().isoformat(), consent_at=consent_at)
         return RedirectResponse(session.url, status_code=303)
 
     def _mark_paid(order_id: str, background: BackgroundTasks) -> None:
@@ -351,6 +390,22 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     @app.get("/policies", response_class=HTMLResponse)
     def policies(request: Request):
         return page(request, "policies.html")
+
+    @app.get("/terms", response_class=HTMLResponse)
+    def terms(request: Request):
+        return page(request, "terms.html", legal_title="Terms of service", active="terms")
+
+    @app.get("/privacy", response_class=HTMLResponse)
+    def privacy(request: Request):
+        return page(request, "privacy.html", legal_title="Privacy policy", active="privacy")
+
+    @app.get("/refunds", response_class=HTMLResponse)
+    def refunds(request: Request):
+        return page(request, "refunds.html", legal_title="Refunds and right of withdrawal", active="refunds")
+
+    @app.get("/legal-notice", response_class=HTMLResponse)
+    def legal_notice(request: Request):
+        return page(request, "legal_notice.html", legal_title="Legal notice", active="notice")
 
     def require_admin(request: Request) -> None:
         """Owner-only pages use the browser's password prompt (any username, password = ADMIN_TOKEN).
