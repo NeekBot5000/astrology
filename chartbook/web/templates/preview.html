@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ order.name }}'s chart · {{ brand }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div class="wrap">
+    <h1>{{ order.name }}'s sky</h1>
+    <p>{{ birth_date_text }}{% if order.birth_time %} at {{ birth_time_text }}{% else %}, time unknown{% endif %} · {{ order.place_name }}</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="preview-grid">
+    <div class="wheel-card">{{ wheel | safe }}</div>
+    <div>
+      <h2 class="eyebrow">Free preview</h2>
+      {% for t in teasers %}
+      <div class="teaser">
+        <div class="label">{{ t.label }}</div>
+        <h3>{{ t.sign }}</h3>
+        <p>{{ t.text }}</p>
+      </div>
+      {% endfor %}
+      {% if not chart.time_known %}
+      <p class="small">Without a birth time there's no rising sign or houses. The book will still cover every planet and the angles between them.</p>
+      {% endif %}
+      <p>That's {{ ['', 'one', 'two', 'three'][teasers | length] }} of the {{ chart.placements | length + (2 if chart.time_known else 0) }} points in this chart. The full book reads them all together, chapter by chapter{% if focus_text %}, with extra depth on {{ focus_text }}{% endif %}.</p>
+      <p class="small">Wrong place or time? <a href="/#start">Start again</a>. The place we found is: {{ order.place_name }}.</p>
+
+      <form class="buy-box" method="post" action="/p/{{ order.id }}/checkout">
+        {% if payments %}
+        <h3>Get the full book: {{ price }}</h3>
+        <p class="small">22 pages, delivered as a PDF a few minutes after payment. One-time payment, 14-day refund.</p>
+        <div class="field">
+          <label for="email">Email for the receipt and download link <span class="small">(optional)</span></label>
+          <input type="email" id="email" name="email" autocomplete="email">
+        </div>
+        <button class="btn btn-dark" type="submit">Continue to secure payment</button>
+        <p class="small">Payment is handled by Stripe. We never see your card details.</p>
+        {% else %}
+        <h3>Reserve the full book</h3>
+        <p class="small">We're putting the finishing touches on the book. Reserve a copy now and we'll email you as soon as it's ready, with launch pricing of {{ price }}. Nothing to pay today.</p>
+        <div class="field">
+          <label for="email">Your email</label>
+          <input type="email" id="email" name="email" autocomplete="email" required>
+        </div>
+        <button class="btn btn-dark" type="submit">Reserve my copy</button>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

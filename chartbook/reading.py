@@ -20,6 +20,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
+from .chart import SIGNS as _SIGN_NAMES
 from .facts import Fact
 
 MODEL = "claude-opus-5-5"
@@ -140,8 +141,20 @@ def facts_block(facts: list[Fact], name: str | None) -> str:
     return f"{who}Chart facts:\n{lines}"
 
 
+MAX_CORE_ASPECTS = 6
+BANNED_PHRASES = ["journey", "tapestry", "embrace", "unlock", "cosmic dance", "the universe has a plan", "as a "]
+MIN_WORDS, MAX_WORDS = 40, 180  # per paragraph; the prompt asks for 70-140
+
+
+def core_facts(spec: ChapterSpec, facts: list[Fact]) -> list[str]:
+    """The facts a chapter should lean on: matching placements and summaries, plus the tightest matching aspects."""
+    matching = [f for f in facts if f.topics & spec.topics]
+    aspects = [f.id for f in matching if f.kind == "aspect"][:MAX_CORE_ASPECTS]  # facts list aspects tightest first
+    return [f.id for f in matching if f.kind != "aspect"] + aspects
+
+
 def chapter_request(spec: ChapterSpec, facts: list[Fact], focus: set[str]) -> str:
-    core = [f.id for f in facts if f.topics & spec.topics]
+    core = core_facts(spec, facts)
     is_focus = spec.focus in focus
     length = "7-9 paragraphs (this is one of the reader's chosen focus areas)" if is_focus else "4-6 paragraphs"
     return (
@@ -154,7 +167,7 @@ def chapter_request(spec: ChapterSpec, facts: list[Fact], focus: set[str]) -> st
 
 def validate(chapter: Chapter, spec: ChapterSpec, facts: list[Fact]) -> list[str]:
     known = {f.id for f in facts}
-    core = {f.id for f in facts if f.topics & spec.topics}
+    core = set(core_facts(spec, facts))
     problems = []
     if len(chapter.paragraphs) < 3:
         problems.append("The chapter needs at least 3 paragraphs.")
@@ -164,6 +177,17 @@ def validate(chapter: Chapter, spec: ChapterSpec, facts: list[Fact]) -> list[str
         unknown = [c for c in p.cites if c not in known]
         if unknown:
             problems.append(f"Paragraph {i} cites unknown IDs: {', '.join(unknown)}.")
+        words = len(p.text.split())
+        if not MIN_WORDS <= words <= MAX_WORDS:
+            problems.append(f"Paragraph {i} has {words} words; aim for 70-140.")
+        lowered = p.text.lower()
+        for phrase in BANNED_PHRASES:
+            if phrase == "as a ":
+                hit = any(lowered.startswith(f"as a {sign.lower()}") for sign in _SIGN_NAMES)
+            else:
+                hit = phrase in lowered
+            if hit:
+                problems.append(f"Paragraph {i} uses the banned phrase {phrase.strip()!r}.")
     cited = {c for p in chapter.paragraphs for c in p.cites}
     if core and not cited & core:
         problems.append("The chapter does not use any of its core facts.")

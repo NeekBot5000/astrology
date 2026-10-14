@@ -1,0 +1,231 @@
+{
+  "name": "Maya",
+  "note": "Fictional sample person. Chapters hand-written in the same JSON format and citation rules the AI writer uses.",
+  "birth": {"date": "1994-05-17", "time": "08:40", "place": "Portland, Oregon, USA", "latitude": 45.5152, "longitude": -122.6784, "tz": "America/Los_Angeles"},
+  "focus": ["love", "growth"],
+  "dedication": "For Maya, who always remembers everyone else's birthday. Happy 32nd. Love, Jess",
+  "chapters": [
+    {
+      "title": "Your Core Self",
+      "opening": "You were born as the morning light was still settling, and much about you settles slowly too, then holds.",
+      "paragraphs": [
+        {
+          "heading": "Steady at the center",
+          "text": "Your Sun sits late in Taurus, the sign of patience, comfort and things built to last. At your core you trust what you can touch: a good meal, a long friendship, money you have actually saved. You rarely decide fast, but once you have decided, people learn that moving you is a bit like moving a well-rooted tree. That steadiness is your quiet superpower. Friends come to you when everything else is shaky, because you are the person who does not wobble.",
+          "cites": ["sun"]
+        },
+        {
+          "heading": "A heart that wants to be seen",
+          "text": "Your Moon, the part of you that feels before it thinks, is in Leo. Underneath the calm Taurus surface is someone who needs warmth, appreciation and, honestly, a little applause. When you are hurt, it is often because effort went unnoticed rather than because something went wrong. A thoughtful thank-you can repair a bad week for you. It is worth admitting this need out loud instead of hoping people guess it, because the people who love you usually want to know.",
+          "cites": ["moon"]
+        },
+        {
+          "heading": "The gentle first impression",
+          "text": "With Cancer rising, the first thing people meet is softness: a caring manner, a quick read of how everyone in the room is feeling, a habit of making sure the newcomer has a drink. Some people mistake this for shyness or for being easy to push around. They find out later about the Taurus stubbornness underneath. Your Moon also rules this Cancer Ascendant, which makes it your chart ruler, so your feelings, more than any plan, steer how you show up in the world.",
+          "cites": ["ascendant", "chart_ruler"]
+        },
+        {
+          "heading": "Feeling safe through what you have earned",
+          "text": "That ruling Moon sits in your 2nd house, the area of money, belongings and self-worth. Your emotional security is tied to feeling capable of looking after yourself: a stocked kitchen, a savings cushion, a home that looks the way you like. You might notice your mood dip when finances are messy, even if nothing is actually wrong. Treat your sense of worth and your bank balance as related but separate things, and give yourself credit for what you are, not just what you have.",
+          "cites": ["chart_ruler", "moon"]
+        },
+        {
+          "heading": "The tension that drives you",
+          "text": "Your Sun sits almost exactly opposite Pluto, the planet of power and transformation, less than a quarter of a degree from exact. This is one of the tightest patterns in your chart. It can feel as though life keeps asking you to give up control just when you have arranged things nicely, and a calm Taurus nature does not love that. Yet each time you have been pushed to change, you came out stronger and more honest. You are tougher than your gentle manner suggests.",
+          "cites": ["sun_opposition_pluto"]
+        }
+      ]
+    },
+    {
+      "title": "How You Think and Speak",
+      "opening": "Your mind talks quickly and quietly at the same time, mostly to itself.",
+      "paragraphs": [
+        {
+          "heading": "A busy mind behind a closed door",
+          "text": "Mercury, your thinking planet, is in quick, curious Gemini, but it sits in your 12th house, the most private part of the chart. So your mind races with ideas, links and half-written sentences, yet much of it happens internally. You might rehearse a conversation five times in the shower and then say only the first line. Journaling, voice notes or long walks give that private stream somewhere to go, and you will often find your best ideas arrive when no one is watching.",
+          "cites": ["mercury"]
+        },
+        {
+          "heading": "Head and heart in conversation",
+          "text": "Mercury forms an easy link with your Leo Moon, so your thinking and feeling usually cooperate. When you do speak up, you tend to be warm, funny and expressive, and you can find the words for what people are feeling better than they can. Writing a card, giving a toast or explaining something tricky to a friend often shows you at your best. You think more clearly once you know how you feel, so let yourself name the feeling first.",
+          "cites": ["moon_sextile_mercury", "moon"]
+        },
+        {
+          "heading": "The inner critic",
+          "text": "Your Mercury also squares Saturn, the planet of discipline and doubt. This can show up as a strict inner editor who questions whether your idea is smart enough, finished enough or worth saying. You may have been told as a child to think before speaking and took it more seriously than most. The upside is real: you check facts, you do not bluff, and when you commit to learning something you go deep. The task is to let ideas out before they are perfect.",
+          "cites": ["mercury_square_saturn", "mercury"]
+        },
+        {
+          "heading": "Learning that means something",
+          "text": "Saturn sits in Pisces in your 9th house of beliefs, travel and higher learning. You are serious about finding a philosophy you actually believe in rather than one you were handed. Courses, books or trips that start as hobbies can turn into long commitments. You may also distrust easy spiritual answers, wanting meaning that holds up under your own scrutiny. Give that search time; your views grow slowly, like everything with Saturn, but they become your own.",
+          "cites": ["saturn"]
+        }
+      ]
+    },
+    {
+      "title": "Love and Connection",
+      "opening": "You love the way you do everything important: carefully at first, then with your whole chest.",
+      "paragraphs": [
+        {
+          "heading": "Attracted to a good mind",
+          "text": "Venus, the planet of attraction, is in Gemini. What lights you up is conversation: someone who makes you laugh, sends you the article you were about to send them, and can argue playfully without getting nasty. Looks matter less than wit and curiosity. A date that turns into four hours of talking is your idea of chemistry. If the talk dries up, so does your interest, even if everything else looks right on paper.",
+          "cites": ["venus"]
+        },
+        {
+          "heading": "Feelings kept behind the curtain",
+          "text": "Your Venus shares the private 12th house with Mercury, so early feelings often stay secret, sometimes even from you. You may have had crushes you never mentioned, or realized you loved someone only after they had moved away. There is something tender and romantic in this, but it can also mean the other person never knows where they stand. Try saying the small true thing earlier than feels comfortable; you do not have to announce everything, just let a little light in.",
+          "cites": ["venus", "mercury"]
+        },
+        {
+          "heading": "Desire that knows how to move",
+          "text": "Venus forms a near-exact easy link with Mars in bold Aries. Attraction and action work together in you: once you do decide you like someone, you can be surprisingly direct, even the one who suggests the first date. Your Mars sits in the 11th house of friendships, so many of your best relationships begin as friendships, in group chats, shared hobbies or a friend's party. The people who know you as a friend first get to see your playful, daring side.",
+          "cites": ["venus_sextile_mars", "mars", "venus"]
+        },
+        {
+          "heading": "Needing to feel treasured",
+          "text": "Your Leo Moon wants to be adored, openly and generously. You show love by remembering details, planning the birthday, making things nice, and you quietly hope for the same in return. When a partner is casual about appreciation, you may not say anything but begin to withdraw. Tell partners plainly what makes you feel valued, whether that is compliments, effort or being shown off a little. Asking does not make it count for less.",
+          "cites": ["moon", "chart_ruler"]
+        },
+        {
+          "heading": "Freedom and ideals in partnership",
+          "text": "Uranus and Neptune sit together in your 7th house of committed partnership. Uranus asks for space and surprise, Neptune for magic and ideals. You may be drawn to unusual people or relationships that do not follow the standard script, and you can be swept up by someone's potential. Love works best when it stays fresh and leaves both people room to grow, but it also helps to look clearly at who someone is today, not only who they could become.",
+          "cites": ["uranus", "neptune"]
+        },
+        {
+          "heading": "When desire meets restlessness",
+          "text": "Mars squares both Uranus and Neptune, so the partnership area is tied to your drive in a slightly restless way. You may notice a pattern of sudden attractions, impatience when things feel predictable, or confusion about what you actually want. These are not flaws; they are signals. When the itch for change appears, ask whether you need something new in the relationship rather than a new relationship. Shared adventures, trying new things together, feed this part of you well.",
+          "cites": ["mars_square_uranus", "mars_square_neptune", "mars"]
+        },
+        {
+          "heading": "Romance that goes deep",
+          "text": "Your 5th house of romance and play holds Jupiter, Pluto and the North Node, all in intense Scorpio. Underneath the light Gemini flirting, you want love that changes you: honesty, loyalty and real emotional depth. Casual dating may feel oddly empty. With the North Node here, growing into this kind of brave, all-in intimacy is part of your path, even if it scares the careful Taurus part of you. The right person will make depth feel safe rather than dramatic.",
+          "cites": ["jupiter", "pluto", "north_node"]
+        }
+      ]
+    },
+    {
+      "title": "Work, Money and Calling",
+      "opening": "You do your best work when it is built to last and good for more than just you.",
+      "paragraphs": [
+        {
+          "heading": "A calling with heart",
+          "text": "Your Midheaven, the point linked to career and public life, is in Pisces. You want work that means something, helps people or makes something beautiful, and purely commercial goals tend to leave you flat. Fields with care, creativity or imagination at their core often suit you, but so does any role where you are the person who understands what the team actually needs. You may also be known for your kindness long before you are known for your title.",
+          "cites": ["midheaven"]
+        },
+        {
+          "heading": "Better together",
+          "text": "Your Sun sits in the 11th house of groups, communities and future plans, joined there by Mars. You light up when you are part of a team with a shared goal, a startup, a nonprofit, a creative collective, even a well-run office. Networking may sound dreary, but in practice your friendships open doors. With Mars here you also have real drive for causes you believe in; you will work late for a mission you care about and resent working late for one you do not.",
+          "cites": ["sun", "mars"]
+        },
+        {
+          "heading": "Original ideas, steady delivery",
+          "text": "Your Sun forms a near-exact easy link with Uranus, the planet of originality. You combine Taurus practicality with a genuine flair for new approaches, which makes you good at modernizing something old without breaking it. Colleagues may be surprised when the calm one suggests the bold idea. Trust that instinct. Your Sun's trine to Neptune adds imagination and empathy, which helps in anything involving design, stories, care work or understanding customers.",
+          "cites": ["sun_trine_uranus", "sun_trine_neptune"]
+        },
+        {
+          "heading": "Money and worth",
+          "text": "With your chart ruler, the Moon, in the 2nd house, how you earn and spend is emotional for you. You like having a cushion and can be generous to the point of overspending on the people you love, a very Leo Moon trait. Your Jupiter, the planet of growth, trines Saturn, the planet of discipline, which suggests a healthy knack for steady, patient building. Slow and sure suits you better than chasing quick wins, in money and in career.",
+          "cites": ["chart_ruler", "jupiter_trine_saturn"]
+        },
+        {
+          "heading": "Rules versus doing it your way",
+          "text": "Your Sun's opposition to Pluto can show up at work as tension with powerful people: bosses who micromanage, institutions that resist change. You are not naturally confrontational, but you hate being controlled. Over time this often leads people with this pattern toward more autonomy, a senior role, freelancing or a business of their own. Learning to negotiate calmly for what you need, rather than enduring until you snap, is one of your biggest professional skills to develop.",
+          "cites": ["sun_opposition_pluto", "sun"]
+        }
+      ]
+    },
+    {
+      "title": "Home and Inner World",
+      "opening": "Your inner world is bigger than most people ever see, and it needs looking after.",
+      "paragraphs": [
+        {
+          "heading": "What makes you feel safe",
+          "text": "Your Cancer rising and Leo Moon together make home a stage for warmth: good food, a comfortable couch, people you love gathered around. You recharge by hosting as much as by hiding, as long as the guests are chosen. A home that feels like yours, with things that reflect your taste, matters more to your mood than you may admit. When life feels chaotic, tending to your space, cooking or rearranging a room is a real way of tending to yourself.",
+          "cites": ["ascendant", "moon"]
+        },
+        {
+          "heading": "Quiet time is not optional",
+          "text": "With Mercury and Venus in the 12th house, you need solitude more than your sociable side suggests. Time alone is where you process feelings, finish thoughts and remember what you actually like. If you go too long without it you may become scattered or snappy without knowing why. Build in regular quiet: early mornings, solo walks, a book in a café. Think of it as maintenance, not as selfishness.",
+          "cites": ["mercury", "venus"]
+        },
+        {
+          "heading": "A strong imagination",
+          "text": "Your Sun's trine to Neptune gives you a rich inner life: vivid dreams, strong intuitions and a talent for sensing the mood behind people's words. Music, films and art can move you deeply. The flip side is that you absorb other people's feelings easily, and crowded or tense places can drain you. Learning to tell your feelings apart from someone else's is a useful skill, and creative outlets are a healthy way to let that sensitivity breathe.",
+          "cites": ["sun_trine_neptune", "neptune"]
+        },
+        {
+          "heading": "Big feelings, big gestures",
+          "text": "Your Moon loosely squares Jupiter, the planet of excess and generosity, so emotions tend to run large. When you are happy, you throw the party; when you are low, it can feel enormous for a while. You may comfort yourself with treats or overcommit to plans while feeling good. None of this needs fixing so much as noticing. Letting a big feeling pass for a day before acting on it will save you from most regrets.",
+          "cites": ["moon_square_jupiter", "moon"]
+        }
+      ]
+    },
+    {
+      "title": "Tensions and Growth",
+      "opening": "The parts of you that pull in different directions are also the parts that make you interesting.",
+      "paragraphs": [
+        {
+          "heading": "Control and surrender",
+          "text": "The defining tension in your chart is the exact opposition between your Taurus Sun and Pluto. Taurus wants stability; Pluto brings endings, upheavals and power struggles that force change. You may have lived through a loss, a move or a family shift that rearranged your world before you were ready. People with this pattern often hold on very tightly to what remains. Your growth comes from learning that you survive change well, so you can loosen your grip a little sooner each time.",
+          "cites": ["sun_opposition_pluto", "sun", "pluto"]
+        },
+        {
+          "heading": "The restless streak",
+          "text": "Your Mars squares Uranus almost exactly. Underneath the calm is a part of you that suddenly wants out: to quit the job, cut your hair, book the flight. When it is ignored for too long it can burst out in impulsive decisions. When it is fed, it becomes courage and originality. Give this side regular, safe outlets, a new class, a solo trip, a creative project with no rules, so it does not have to stage a rebellion.",
+          "cites": ["mars_square_uranus", "mars"]
+        },
+        {
+          "heading": "Fog around what you want",
+          "text": "Mars also squares Neptune, which can blur your sense of what you want and how to go after it. You might start strong and then lose energy, or find yourself chasing goals that belong more to other people. Low motivation is sometimes a sign you are working toward the wrong thing. Checking in honestly with yourself, writing down what you want in plain words, helps turn vague longing into a direction you can actually walk in.",
+          "cites": ["mars_square_neptune", "mars"]
+        },
+        {
+          "heading": "Speaking before it is perfect",
+          "text": "Your Mercury squares Saturn, and with Mercury hidden in the 12th house, your biggest communication challenge is holding things in. You may wait for the perfect moment or the perfect wording and let the chance pass. The fix is practice, not confidence: say the slightly clumsy version, send the imperfect email, raise the issue while it is still small. You will notice people value your honesty far more than your polish.",
+          "cites": ["mercury_square_saturn", "mercury"]
+        },
+        {
+          "heading": "Balanced, with gentle edges",
+          "text": "Your planets are spread fairly evenly across fire, earth, air and water, with earth slightly strongest. This balance is a gift: you can be practical and dreamy, social and private. It also means no single approach dominates, so you may feel pulled between options. Earth leading the way suggests your best growth tool is concrete action. When you feel stuck in feelings or ideas, doing one small practical thing usually gets everything moving again.",
+          "cites": ["balance"]
+        },
+        {
+          "heading": "Growth through depth",
+          "text": "Your North Node, the point astrologers link to the direction of growth, sits in Scorpio in the 5th house, right beside Pluto. Taurus energy wants comfort and safety, but growth for you lies in risk: creative self-expression, falling in love properly, and letting people see the intense, passionate side you usually keep tidy. Your Sun sits opposite this point, so leaning into it will feel unnatural at first. That discomfort is a sign you are heading the right way.",
+          "cites": ["north_node", "pluto_conjunction_north_node", "sun_opposition_north_node"]
+        },
+        {
+          "heading": "Your built-in support",
+          "text": "Not everything in your chart is tension. Your Venus and Mars cooperate, your Moon and Mercury work as a team, and your Jupiter supports your Saturn. These easy links mean that when you do decide to change, you usually have the warmth, words and patience to follow through. You are better equipped for growth than your cautious side believes. Lean on your friendships, too: with the Sun in the 11th house, you grow fastest alongside other people.",
+          "cites": ["venus_sextile_mars", "moon_sextile_mercury", "jupiter_trine_saturn", "sun"]
+        }
+      ]
+    },
+    {
+      "title": "Your Direction",
+      "opening": "Your chart points toward a life that is both secure and brave, and you are allowed to want both.",
+      "paragraphs": [
+        {
+          "heading": "From comfortable to courageous",
+          "text": "Your North Node in Scorpio asks you to trade a little comfort for a lot of depth. In practice, that might look like starting the creative project you keep postponing, telling someone what you really feel, or letting a relationship transform you. The Neptune link to your North Node suggests intuition will guide you here better than spreadsheets. When something scares you and excites you at the same time, it is worth paying attention.",
+          "cites": ["north_node", "neptune_sextile_north_node"]
+        },
+        {
+          "heading": "Where luck tends to show up",
+          "text": "Jupiter, the planet of growth and good fortune, sits in your 5th house of creativity, romance and play. Joy is not a distraction from your path; it is part of it. Opportunities may come through hobbies, creative work or simply doing what you enjoy in front of others. Jupiter's easy link to Saturn means fun and discipline can work together for you, so the passion project done steadily, an hour each week, is exactly how good things grow.",
+          "cites": ["jupiter", "jupiter_trine_saturn"]
+        },
+        {
+          "heading": "Making a difference with others",
+          "text": "With your Sun and Mars in the 11th house and your Midheaven in Pisces, your strongest contribution is likely to come through communities and causes. You are happiest when your steady effort supports a bigger shared vision. Look for circles that care about the same things you do; they will feed your energy and open unexpected doors. You do not need to be the loudest voice. You are often the one who makes the whole thing actually work.",
+          "cites": ["sun", "mars", "midheaven"]
+        },
+        {
+          "heading": "Carrying this book forward",
+          "text": "Your chart describes a patient, warm, quietly brilliant person who is learning to take up a bit more space. The steady Taurus Sun, the generous Leo Moon steering your chart and the private, curious mind all add up to someone people trust deeply. Use these pages as a mirror, not a rulebook. Keep what rings true, question what does not, and come back to it when you need reminding of who you are when you are at your best.",
+          "cites": ["sun", "chart_ruler", "mercury"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block main %}
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>A birth-chart book written for one person</h1>
+      <p class="lede">Give us a birth date, time and place. We calculate the real sky at that moment and write a 20-page reading where every paragraph names the placement it comes from. Nothing generic, nothing copied from a horoscope column.</p>
+      <a class="btn btn-gold" href="#start">See a free chart preview</a>
+      <a class="btn-link" href="/sample.pdf">Read a full sample book (PDF)</a>
+      <p class="price-note">{{ price }} once, delivered as a PDF in minutes. No subscription, no account.</p>
+    </div>
+    <div class="art" aria-hidden="true">{{ hero_wheel | safe }}</div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>From a birthday to a book</h2>
+    <ol class="steps">
+      <li><h3>Enter the birth details</h3>Date, time if you know it, and the town of birth. You'll see the chart wheel and Sun, Moon and rising sign for free.</li>
+      <li><h3>We map the sky</h3>Planet positions come from the Swiss Ephemeris, the same astronomical data professional astrologers use, with historical time zones handled properly.</li>
+      <li><h3>Your book is written</h3>Seven chapters on personality, love, work, home and growth, written from that chart alone. Download the PDF, print it or send it as a gift.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="block" id="sample">
+  <div class="wrap narrow">
+    <p class="eyebrow">Read before you buy</p>
+    <h2>A real chapter from a sample book</h2>
+    <p>This is from the book of Maya, a sample person born 17 May 1994 in Portland, Oregon. See the ✦ line under each section? That's the part of her chart the paragraph is based on. Every book works this way.</p>
+    <article class="sample fade" aria-label="Sample chapter">
+      <div class="chap-num">Chapter Three</div>
+      <h3 class="chap-title">{{ chapter.title }}</h3>
+      <p class="opening">{{ chapter.opening }}</p>
+      {% for p in chapter.paragraphs[:4] %}
+      <div class="para">
+        {% if p.heading %}<h3>{{ p.heading }}</h3>{% endif %}
+        <p>{{ p.text }}</p>
+        <div class="source">{{ sample_sources[loop.index0] }}</div>
+      </div>
+      {% endfor %}
+    </article>
+    <p class="sample-cta"><a class="btn btn-dark" href="/sample.pdf">Read Maya's whole book (PDF, 22 pages)</a></p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <p class="eyebrow">What's inside</p>
+    <h2>Every book includes</h2>
+    <ul class="inside">
+      <li>A cover with their own chart wheel and name</li>
+      <li>An optional gift dedication page in your words</li>
+      <li>A full-color chart wheel and table of planet positions</li>
+      <li>Seven chapters: core self, mind, love, work, home, growth and direction</li>
+      <li>Longer chapters on the areas they care about most</li>
+      <li>A plain-English guide to signs, houses and aspects</li>
+    </ul>
+  </div>
+</section>
+
+<section class="block promise">
+  <div class="wrap">
+    <p class="eyebrow" style="color: var(--gold-strong)">Our promise</p>
+    <h2>Honest pricing, in a category known for the opposite</h2>
+    <div class="big-price">{{ price }}</div>
+    <p>One payment for one book. That's all.</p>
+    <div class="grid">
+      <div><h3>No subscription</h3>We never sign you up for anything. There is nothing to cancel.</div>
+      <div><h3>14-day refund</h3>If the book doesn't feel personal, email us within 14 days for a full refund. No forms, no arguing.</div>
+      <div><h3>Your data, deleted</h3>Birth details are erased {{ keep_days }} days after delivery, or right away with one click.</div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="start">
+  <div class="wrap narrow">
+    <p class="eyebrow">Start here</p>
+    <h2>Whose sky are we mapping?</h2>
+    <p>The preview is free. You'll only be asked to pay once you've seen their chart.</p>
+    <form class="order-form" method="post" action="/preview" novalidate>
+      {% if errors %}
+      <div class="errors" role="alert" tabindex="-1" id="form-errors">
+        <strong>Please check a few things:</strong>
+        <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+      <div class="field">
+        <label for="name">First name</label>
+        <p class="hint" id="name-hint">As you'd like it on the cover. It can be yours or the person you're gifting.</p>
+        <input type="text" id="name" name="name" maxlength="40" autocomplete="given-name" required aria-describedby="name-hint" value="{{ form.name or '' }}">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="birth_date">Birth date</label>
+          <input type="date" id="birth_date" name="birth_date" min="1900-01-01" required value="{{ form.birth_date or '' }}">
+        </div>
+        <div class="field">
+          <label for="birth_time">Birth time</label>
+          <input type="time" id="birth_time" name="birth_time" value="{{ form.birth_time or '' }}" aria-describedby="time-hint">
+          <label class="check"><input type="checkbox" name="time_unknown" value="true" {% if form.time_unknown %}checked{% endif %}> I don't know the time</label>
+        </div>
+      </div>
+      <p class="hint" id="time-hint">The exact time (from a birth certificate if possible) gives the rising sign and houses. Without it the book still works, just a little less detailed.</p>
+      <div class="field">
+        <label for="place">Town or city of birth</label>
+        <p class="hint" id="place-hint">Add the country to be safe, for example “Springfield, Illinois, USA”.</p>
+        <input type="text" id="place" name="place" maxlength="120" required aria-describedby="place-hint" value="{{ form.place or '' }}">
+      </div>
+      <fieldset class="field">
+        <legend>What should the book focus on? <span class="small">(optional)</span></legend>
+        {% for key, label in focus_labels.items() %}
+        <label class="check"><input type="checkbox" name="focus" value="{{ key }}" {% if form.focus and key in form.focus %}checked{% endif %}> {{ label }}</label>
+        {% endfor %}
+      </fieldset>
+      <div class="field">
+        <label for="dedication">Gift note for the first page <span class="small">(optional)</span></label>
+        <textarea id="dedication" name="dedication" maxlength="300" placeholder="Happy birthday, Sam. Thought you'd recognize yourself in this. Love, Alex">{{ form.dedication or '' }}</textarea>
+      </div>
+      <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <button class="btn btn-dark" type="submit">Show the free preview</button>
+      <p class="small">We use the place only to look up its coordinates and time zone.</p>
+    </form>
+  </div>
+</section>
+
+<section class="block" id="faq">
+  <div class="wrap narrow">
+    <p class="eyebrow">Questions</p>
+    <h2>Good to know</h2>
+    <details><summary>Who writes the book?</summary><p>The planet positions are calculated by astronomical software. The text is written by an AI model that sees only those calculated placements, under strict rules: every paragraph must be based on specific placements, which we check automatically before the book is made. That's why each section can show you exactly where it comes from.</p></details>
+    <details><summary>What if I don't know the birth time?</summary><p>You'll still get a full book. We use midday, leave out the rising sign and houses (they change every few minutes), and say so clearly in the book.</p></details>
+    <details><summary>Is it a good gift?</summary><p>That's what it's designed for. Add a note for the first page, then download the PDF to email or print. It's sized like a paperback (6 × 9 inches) and prints well at home or at a copy shop.</p></details>
+    <details><summary>How is this different from a free horoscope or chatbot?</summary><p>Horoscopes use only the Sun sign, which you share with one in twelve people. This book uses the whole chart: every planet, its house and the angles between them, calculated for the exact place and time. And it shows its working on every page.</p></details>
+    <details><summary>Do you keep my information?</summary><p>Only as long as needed. Birth details and the book file are erased {{ keep_days }} days after delivery, and you can erase them immediately from your download page. Card details go straight to our payment provider; we never see or store them.</p></details>
+    <details><summary>Is astrology scientifically proven?</summary><p>No. We think of a birth chart as a mirror for reflection, not a prediction. The book says so too, and avoids predictions about health, money or relationships.</p></details>
+  </div>
+</section>
+{% if errors %}
+<script>document.getElementById("form-errors").focus();</script>
+{% endif %}
+{% endblock %}

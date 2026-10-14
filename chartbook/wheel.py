@@ -17,16 +17,21 @@ from .chart import SIGNS, Chart
 from .facts import ELEMENT
 from .glyphs import BODY_GLYPHS, SIGN_GLYPHS
 
-ELEMENT_FILL = {"fire": "#f6e3d8", "earth": "#e6eadb", "air": "#e8e6f2", "water": "#dde9ef"}
-ASPECT_STYLE = {
-    "conjunction": None,  # drawn as overlap, no line
-    "trine": ("#3b7d6e", ""),
-    "sextile": ("#3b7d6e", "4 3"),
-    "square": ("#b2533e", ""),
-    "opposition": ("#b2533e", "8 3"),
+PALETTES = {
+    # Full-color wheel for the chart page and the website.
+    "day": {
+        "ink": "#2b2a33", "muted": "#6d6a78", "face": "#fbfaf7", "inner": "#ffffff",
+        "fire": "#f6e3d8", "earth": "#e6eadb", "air": "#e8e6f2", "water": "#dde9ef",
+        "easy": "#3b7d6e", "hard": "#b2533e",
+    },
+    # Single-color line art for the dark cover.
+    "night": {
+        "ink": "#e8d7a8", "muted": "#b9a97f", "face": "none", "inner": "none",
+        "fire": "none", "earth": "none", "air": "none", "water": "none",
+        "easy": "#e8d7a8", "hard": "#e8d7a8",
+    },
 }
-INK = "#2b2a33"
-MUTED = "#8a8794"
+ASPECT_DASH = {"trine": "", "sextile": "4 3", "square": "", "opposition": "8 3"}  # conjunctions: no line
 
 
 def _polar(cx: float, cy: float, r: float, angle_deg: float) -> tuple[float, float]:
@@ -69,7 +74,9 @@ def _glyph(path_d: str, x: float, y: float, size: float, color: str, stroke: flo
     )
 
 
-def render_wheel(chart: Chart, size: int = 600, title: str | None = None) -> str:
+def render_wheel(chart: Chart, size: int = 600, title: str | None = None, palette: str = "day") -> str:
+    pal = PALETTES[palette]
+    INK, MUTED = pal["ink"], pal["muted"]
     cx = cy = size / 2
     r_out = size * 0.452
     r_sign = size * 0.378    # inner edge of the zodiac ring
@@ -87,7 +94,7 @@ def render_wheel(chart: Chart, size: int = 600, title: str | None = None) -> str
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}" width="{size}" height="{size}" '
         f'role="img" aria-labelledby="wheel-title">',
         f'<title id="wheel-title">{escape(title or "Birth chart wheel")}</title>',
-        f'<circle cx="{cx}" cy="{cy}" r="{r_out}" fill="#fbfaf7" stroke="{INK}" stroke-width="1.5"/>',
+        f'<circle cx="{cx}" cy="{cy}" r="{r_out}" fill="{pal['face']}" stroke="{INK}" stroke-width="1.5"/>',
     ]
 
     # Zodiac ring: 12 colored segments with sign glyphs.
@@ -100,7 +107,7 @@ def render_wheel(chart: Chart, size: int = 600, title: str | None = None) -> str
         parts.append(
             f'<path d="M{x0:.2f},{y0:.2f} A{r_out},{r_out} 0 0 0 {x1:.2f},{y1:.2f} '
             f'L{x2:.2f},{y2:.2f} A{r_sign},{r_sign} 0 0 1 {x3:.2f},{y3:.2f} Z" '
-            f'fill="{ELEMENT_FILL[ELEMENT[sign]]}" stroke="{INK}" stroke-width="0.8"/>'
+            f'fill="{pal[ELEMENT[sign]]}" stroke="{INK}" stroke-width="0.8"/>'
         )
         gx, gy = _polar(cx, cy, (r_out + r_sign) / 2, ang(i * 30 + 15))
         parts.append(_glyph(SIGN_GLYPHS[sign], gx, gy, size * 0.045, INK))
@@ -110,7 +117,7 @@ def render_wheel(chart: Chart, size: int = 600, title: str | None = None) -> str
             t1 = _polar(cx, cy, r_sign + (size * 0.012 if d else size * 0.02), ang(i * 30 + d))
             parts.append(f'<line x1="{t0[0]:.2f}" y1="{t0[1]:.2f}" x2="{t1[0]:.2f}" y2="{t1[1]:.2f}" stroke="{INK}" stroke-width="0.6"/>')
 
-    parts.append(f'<circle cx="{cx}" cy="{cy}" r="{r_sign}" fill="#ffffff" stroke="{INK}" stroke-width="1"/>')
+    parts.append(f'<circle cx="{cx}" cy="{cy}" r="{r_sign}" fill="{pal['inner']}" stroke="{INK}" stroke-width="1"/>')
     parts.append(f'<circle cx="{cx}" cy="{cy}" r="{r_aspect}" fill="none" stroke="{MUTED}" stroke-width="0.6"/>')
 
     # Houses
@@ -140,10 +147,10 @@ def render_wheel(chart: Chart, size: int = 600, title: str | None = None) -> str
     # Aspect lines
     lon_of = {p.body: p.longitude for p in chart.placements}
     for a in chart.aspects:
-        style = ASPECT_STYLE[a.kind]
-        if style is None:
+        if a.kind == "conjunction":
             continue
-        color, dash = style
+        dash = ASPECT_DASH[a.kind]
+        color = pal["easy"] if a.kind in ("trine", "sextile") else pal["hard"]
         p0 = _polar(cx, cy, r_aspect, ang(lon_of[a.body1]))
         p1 = _polar(cx, cy, r_aspect, ang(lon_of[a.body2]))
         opacity = max(0.35, 1 - a.orb / 8)

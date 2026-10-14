@@ -74,6 +74,12 @@ class Fact:
     id: str
     text: str
     topics: frozenset[str]
+    kind: str = "placement"  # "placement", "aspect" or "summary"
+    label: str = ""  # short reader-facing source line, e.g. "Venus in Gemini, 12th house"
+
+
+def ordinal(n: int) -> str:
+    return f"{n}{'th' if 11 <= n % 100 <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
 def _slug(name: str) -> str:
@@ -93,7 +99,11 @@ def _placement_fact(p: Placement) -> Fact:
         text += " Its sign is shared by everyone born within several years, so stress its house and aspects."
     if 29 <= p.degree_in_sign or p.degree_in_sign < 1:
         text += " It sits right at the edge of a sign, a point astrologers treat as a threshold."
-    return Fact(_slug(p.body), text, _topics_for(p.body, p.house))
+    if p.body == "Ascendant":
+        label = f"{p.sign} rising"
+    else:
+        label = f"{p.body} in {p.sign}" + (f", {ordinal(p.house)} house" if p.house and p.body != "Midheaven" else "")
+    return Fact(_slug(p.body), text, _topics_for(p.body, p.house), label=label)
 
 
 def _topics_for(body: str, house: int | None) -> frozenset[str]:
@@ -128,6 +138,8 @@ def chart_facts(chart: Chart, name: str | None = None) -> list[Fact]:
             f"Chart ruler: {ruler} (rules the {chart.ascendant.sign} Ascendant), placed in {rp.sign}{where}. "
             "The chart ruler colors the whole personality.",
             frozenset({"identity", "purpose"}),
+            kind="summary",
+            label=f"Chart ruler: {ruler}",
         ))
 
     personal = [p for p in chart.placements if p.body != "North Node"]
@@ -141,7 +153,7 @@ def chart_facts(chart: Chart, name: str | None = None) -> list[Fact]:
     if missing:
         text += f" No planets in {', '.join(missing)}, which astrologers read as something to consciously develop."
     text += f" Modality balance: {mode_text}."
-    facts.append(Fact("balance", text, frozenset({"identity", "growth"})))
+    facts.append(Fact("balance", text, frozenset({"identity", "growth"}), kind="summary", label="Element balance"))
 
     if chart.house_cusps:
         houses = Counter(p.house for p in personal)
@@ -152,9 +164,13 @@ def chart_facts(chart: Chart, name: str | None = None) -> list[Fact]:
                 "; ".join(f"House {h} holds {houses[h]} planets ({HOUSE_THEME[h]})" for h in busy)
                 + ". A crowded house is a major life focus.",
                 frozenset().union(*(_topics_for("", h) for h in busy)),
+                kind="summary",
+                label="Crowded " + " and ".join(f"{ordinal(h)} house" for h in busy),
             ))
 
     for a in chart.aspects:
+        if a.body1 in GENERATIONAL and a.body2 in GENERATIONAL:
+            continue  # shared by everyone born within years of each other; not personal
         tight = "very tight" if a.orb < 1.5 else ("close" if a.orb < 4 else "wide")
         topics = _topics_for(a.body1, None) | _topics_for(a.body2, None)
         facts.append(Fact(
@@ -162,8 +178,10 @@ def chart_facts(chart: Chart, name: str | None = None) -> list[Fact]:
             f"{a.body1} {a.kind} {a.body2} ({tight}, {a.orb}° from exact): {ASPECT_THEME[a.kind]}, "
             f"linking {BODY_THEME[a.body1]} with {BODY_THEME[a.body2]}.",
             frozenset(topics),
+            kind="aspect",
+            label=f"{a.body1} {a.kind} {a.body2}",
         ))
 
     for i, note in enumerate(chart.notes, 1):
-        facts.append(Fact(f"note_{i}", note, frozenset({"identity"})))
+        facts.append(Fact(f"note_{i}", note, frozenset({"identity"}), kind="summary", label="Chart note"))
     return facts

@@ -22,3 +22,6 @@ output/
 .DS_Store
 .idea/
 .vscode/
+
+# App data (orders database, finished books)
+data/

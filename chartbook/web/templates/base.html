@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ brand }}: a birth-chart book written for one person{% endblock %}</title>
+<meta name="description" content="A personalized birth-chart reading, calculated from the real sky at the moment of birth and delivered as a beautiful PDF book. A one-time gift, no subscription.">
+<link rel="stylesheet" href="/static/site.css">
+{% block head %}{% endblock %}
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">{{ brand }}</a>
+    <nav aria-label="Main">
+      <a href="/#sample">Sample</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/#start">Start</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Our books are for entertainment and self-reflection. They are not a substitute for medical, legal, financial or psychological advice.</p>
+    <p><a href="/policies">Refunds, privacy and terms</a> · <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+  </div>
+</footer>
+</body>
+</html>

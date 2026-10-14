@@ -1,0 +1,4 @@
+Cormorant Garamond (Copyright 2015 The Cormorant Project Authors) and
+Source Serif 4 (Copyright 2014-2021 Adobe) are licensed under the SIL Open Font
+License, Version 1.1. Full license text: https://openfontlicense.org/open-font-license-official-text/
+The fonts may be bundled, embedded and used commercially; they may not be sold on their own.
