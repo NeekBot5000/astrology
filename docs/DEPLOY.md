@@ -43,6 +43,6 @@ Then open http://localhost:8000.
 ## Good to know
 
 - **One server, one process.** Books are written in the background inside the web process. That's fine for hundreds of orders a day. If sales take off, move writing to a separate worker.
-- **Stats page:** `https://YOUR-DOMAIN/admin/stats?token=YOUR_ADMIN_TOKEN`. Keep that link private, because the token is in the address.
+- **Stats page:** `https://YOUR-DOMAIN/admin/stats`. Your browser asks for a username and password: type anything as the username and your `ADMIN_TOKEN` as the password.
 - **Data:** orders and books are erased automatically `KEEP_DAYS` (30) days after delivery. Back up nothing personal; there's nothing to keep.
 - **Not verified yet:** the Docker image hasn't been built in the development sandbox (no Docker engine there). The first deploy is the test; if it fails, the build log will say why.

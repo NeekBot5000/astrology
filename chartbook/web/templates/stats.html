@@ -10,7 +10,7 @@
     <tr><th scope="row">Paid</th><td>{{ reached.paid }}</td></tr>
     <tr><th scope="row">Preview → paid or reserved</th><td>{% if previews %}{{ "%.1f" | format(100 * (reached.paid + reached.preorder) / previews) }}%{% else %}–{% endif %}</td></tr>
   </table>
-  <p><a href="/admin/preorders.csv?token={{ request.query_params.get('token', '') | urlencode }}">Download reserved-copy emails (CSV)</a>. Each row has a private link back to that person's preview, ready for when payments are switched on.</p>
+  <p><a href="/admin/preorders.csv">Download reserved-copy emails (CSV)</a>. Each row has a private link back to that person's preview, ready for when payments are switched on.</p>
   <h2>By link tag</h2>
   <div style="overflow-x: auto">
   <table class="stats funnel">

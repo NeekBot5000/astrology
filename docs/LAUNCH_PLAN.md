@@ -5,7 +5,7 @@
 **Budget:** close to $0 in ads. The cost is your time: about 5-7 hours a week for 7 weeks.
 **Window:** 2 Nov to 24 Dec 2026. Christmas helps us: a PDF gift that arrives within minutes is the perfect last-minute present.
 
-Every number below can be read from the site's stats page (`/admin/stats?token=...`). Each channel gets its own link tag (`?src=tiktok` etc.), so you can see which channel sends visitors who actually buy.
+Every number below can be read from the site's stats page (`/admin/stats`, password = your `ADMIN_TOKEN`). Each channel gets its own link tag (`?src=tiktok` etc.), so you can see which channel sends visitors who actually buy.
 
 ---
 

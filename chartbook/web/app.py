@@ -5,6 +5,8 @@ Run locally:  uvicorn chartbook.web.app:app --reload
 
 from __future__ import annotations
 
+import base64
+import binascii
 import csv
 import hmac
 import io
@@ -28,7 +30,7 @@ from ..sample import time_text
 from ..wheel import render_wheel
 from .config import Settings, load_settings
 from .pipeline import make_book
-from .store import Store
+from .store import Store, now
 
 log = logging.getLogger(__name__)
 HERE = Path(__file__).parent
@@ -48,7 +50,7 @@ SIGN_STYLE = {
     "Aquarius": "independent, inventive and guided by ideals",
     "Pisces": "imaginative, empathetic and deeply intuitive",
 }
-BOT_UA = re.compile(r"bot|crawl|spider|slurp|preview|monitor|curl|python-requests", re.I)
+BOT_UA = re.compile(r"bot[/;)\-]|bot$|crawl|spider|slurp|facebookexternalhit|curl/|python-requests|headless", re.I)
 FOCUS_LABELS = {"love": "Love and relationships", "career": "Work and calling", "growth": "Personal growth"}
 
 
@@ -68,6 +70,11 @@ class RateLimiter:
             return False
         q.append(t)
         return True
+
+
+def clean_tag(value: str | None) -> str:
+    """Normalize a marketing link tag: lowercase letters, digits and dashes, at most 30 characters."""
+    return re.sub(r"[^a-z0-9-]", "", (value or "").lower())[:30]
 
 
 def _anthropic_client():
@@ -122,10 +129,10 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
 
     @app.get("/", response_class=HTMLResponse)
     def index(request: Request, src: str = ""):
-        tag = re.sub(r"[^a-z0-9-]", "", src.lower())[:30]
+        tag = clean_tag(src)
         response = page(request, "index.html", form={}, errors=[], **landing)
         if not BOT_UA.search(request.headers.get("user-agent", "")):
-            store.count_visit(tag or request.cookies.get("src") or "direct")
+            store.count_visit(tag or clean_tag(request.cookies.get("src")) or "direct")
         if tag:
             # Remember which link brought this visitor, so a later purchase can be credited to it.
             response.set_cookie("src", tag, max_age=30 * 86400, samesite="lax", httponly=True)
@@ -200,7 +207,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
             name=name, birth_date=bdate.isoformat(), birth_time=btime.strftime("%H:%M") if btime else None,
             place_name=found.name, latitude=found.latitude, longitude=found.longitude, tz=found.tz_name,
             focus=",".join(focus), dedication=dedication or None,
-            source=re.sub(r"[^a-z0-9-]", "", request.cookies.get("src", ""))[:30] or None,
+            source=clean_tag(request.cookies.get("src")) or None,
         )
         return RedirectResponse(f"/p/{order.id}", status_code=303)
 
@@ -242,12 +249,12 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         order = _order_or_404(order_id)
         if order.status not in buyable_statuses():
             return RedirectResponse(f"/order/{order.id}", status_code=303)
-        email = email.strip()[:200] or None
+        email = email.strip()[:200] or order.email  # keep the reservation email if the field is left blank
         if not settings.payments_enabled:
             # Pre-order mode: no payment taken yet; we just record interest.
             if not email or "@" not in email:
                 raise HTTPException(422, "An email address is needed to reserve a copy.")
-            store.update(order.id, status="preorder", email=email)
+            store.update(order.id, status="preorder", email=email, reserved_at=order.reserved_at or now().isoformat())
             return RedirectResponse(f"/order/{order.id}", status_code=303)
         session = stripe_client.v1.checkout.sessions.create(params={
             "mode": "payment",
@@ -265,11 +272,12 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
             "success_url": f"{settings.base_url}/order/{order.id}?session_id={{CHECKOUT_SESSION_ID}}",
             "cancel_url": f"{settings.base_url}/p/{order.id}",
         })
-        store.update(order.id, status="awaiting_payment", stripe_session=session.id, email=email)
+        store.update(order.id, status="awaiting_payment", stripe_session=session.id, email=email, checkout_at=now().isoformat())
         return RedirectResponse(session.url, status_code=303)
 
     def _mark_paid(order_id: str, background: BackgroundTasks) -> None:
         if store.claim(order_id, ("awaiting_payment",), "paid"):
+            store.update(order_id, paid_at=now().isoformat())
             background.add_task(make_book, store, order_id, writer_client, settings.data_dir)
 
     @app.get("/order/{order_id}", response_class=HTMLResponse)
@@ -327,26 +335,39 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     def policies(request: Request):
         return page(request, "policies.html")
 
-    @app.get("/admin/stats", response_class=HTMLResponse)
-    def stats(request: Request, token: str = "", since: str = ""):
-        """Pre-sale test numbers for the owner. Protected by ADMIN_TOKEN; disabled when it is unset."""
-        if not settings.admin_token or not hmac.compare_digest(token, settings.admin_token):
+    def require_admin(request: Request) -> None:
+        """Owner-only pages use the browser's password prompt (any username, password = ADMIN_TOKEN).
+
+        Disabled entirely when ADMIN_TOKEN is unset. Using a header instead of ?token= keeps the
+        password out of server logs and browser history.
+        """
+        if not settings.admin_token:
             raise HTTPException(404)
+        given = ""
+        auth = request.headers.get("authorization", "")
+        if auth.lower().startswith("basic "):
+            try:
+                given = base64.b64decode(auth[6:]).decode("utf-8").partition(":")[2]
+            except (ValueError, binascii.Error):
+                given = ""
+        if not hmac.compare_digest(given.encode(), settings.admin_token.encode()):
+            raise HTTPException(401, headers={"WWW-Authenticate": 'Basic realm="owner"'})
+
+    @app.get("/admin/stats", response_class=HTMLResponse)
+    def stats(request: Request, since: str = ""):
+        """Pre-sale test numbers for the owner."""
+        require_admin(request)
+        funnel = store.funnel(since or None)
+        # Erased rows keep their reserved/paid timestamps, so these totals don't shrink over time.
+        previews = sum(r["previews"] for r in funnel)
+        reached = {"preorder": sum(r["preorders"] for r in funnel), "paid": store.paid_count(since or None)}
         counts = store.counts(since or None)
-        # Rows are erased over time, but their status survives as "deleted"; count every row as a preview.
-        previews = sum(counts.values())
-        reached = {
-            "preorder": counts.get("preorder", 0),
-            "paid": sum(counts.get(s, 0) for s in ("paid", "writing", "ready", "failed")),
-        }
-        return page(request, "stats.html", counts=counts, previews=previews, reached=reached, since=since,
-                    funnel=store.funnel(since or None))
+        return page(request, "stats.html", counts=counts, previews=previews, reached=reached, since=since, funnel=funnel)
 
     @app.get("/admin/preorders.csv")
-    def preorders_csv(token: str = ""):
+    def preorders_csv(request: Request):
         """Emails of people who reserved a copy, so the owner can tell them when ordering opens."""
-        if not settings.admin_token or not hmac.compare_digest(token, settings.admin_token):
-            raise HTTPException(404)
+        require_admin(request)
         out = io.StringIO()
         w = csv.writer(out)
         w.writerow(["reserved_at", "email", "name", "order_link", "link_tag"])

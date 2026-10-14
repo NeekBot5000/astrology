@@ -36,6 +36,8 @@ def main() -> None:
     a = p.parse_args()
 
     out = Path(a.out)
+    if out.suffix.lower() != ".pdf":
+        p.error("--out must end in .pdf (the chapter text is saved next to it as .json)")
     if a.from_json:
         book_json = Path(a.from_json)
     else:

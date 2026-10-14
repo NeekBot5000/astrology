@@ -34,7 +34,10 @@ CREATE TABLE IF NOT EXISTS orders (
     error TEXT,
     pdf_path TEXT,
     ready_at TEXT,
-    source TEXT
+    source TEXT,
+    reserved_at TEXT,
+    checkout_at TEXT,
+    paid_at TEXT
 );
 CREATE TABLE IF NOT EXISTS visits (
     day TEXT NOT NULL,
@@ -47,7 +50,6 @@ CREATE TABLE IF NOT EXISTS visits (
 # preview -> (awaiting_payment -> paid | preorder) -> writing -> ready | failed ; any -> deleted
 STATUSES = {"preview", "awaiting_payment", "preorder", "paid", "writing", "ready", "failed", "deleted"}
 PREORDER_DAYS = 120
-PAID_STATUSES = ("paid", "writing", "ready", "failed")
 PERSONAL = ("name", "email", "birth_date", "birth_time", "place_name", "latitude", "longitude", "tz", "dedication")
 
 
@@ -71,6 +73,9 @@ class Order:
     pdf_path: str | None = None
     ready_at: str | None = None
     source: str | None = None  # marketing link tag, e.g. "tiktok"
+    reserved_at: str | None = None  # when they reserved a copy (pre-order mode)
+    checkout_at: str | None = None  # when they last went to the payment page
+    paid_at: str | None = None  # kept after erasing, so sales stay countable
 
     @property
     def focus_set(self) -> set[str]:
@@ -86,9 +91,11 @@ class Store:
         self.path = str(path)
         with self._conn() as c:
             c.executescript(SCHEMA)
+            # Add columns that older databases don't have yet.
             cols = {r["name"] for r in c.execute("PRAGMA table_info(orders)")}
-            if "source" not in cols:  # databases created before link tags existed
-                c.execute("ALTER TABLE orders ADD COLUMN source TEXT")
+            for col in ("source", "reserved_at", "checkout_at", "paid_at"):
+                if col not in cols:
+                    c.execute(f"ALTER TABLE orders ADD COLUMN {col} TEXT")
 
     @contextmanager
     def _conn(self) -> Iterator[sqlite3.Connection]:
@@ -152,9 +159,12 @@ class Store:
         with self._conn() as c:
             ids = [r["id"] for r in c.execute(
                 "SELECT id FROM orders WHERE (status IN ('ready', 'failed') AND COALESCE(ready_at, created_at) < ?) "
-                "OR (status IN ('preview', 'awaiting_payment') AND created_at < ?) "
-                "OR (status = 'preorder' AND created_at < ?)",
-                (cutoff_ready, cutoff_preview, cutoff_preorder),
+                "OR (status = 'preview' AND reserved_at IS NULL AND created_at < ?) "
+                # Abandoned checkout: Stripe sessions expire after 24 hours, so 2 days is safe.
+                "OR (status = 'awaiting_payment' AND reserved_at IS NULL AND COALESCE(checkout_at, created_at) < ?) "
+                # Reservations (even ones that later started a checkout) are kept for PREORDER_DAYS.
+                "OR (status IN ('preorder', 'awaiting_payment') AND reserved_at IS NOT NULL AND reserved_at < ?)",
+                (cutoff_ready, cutoff_preview, cutoff_preview, cutoff_preorder),
             )]
         for i in ids:
             self.erase(i)
@@ -168,6 +178,10 @@ class Store:
                 (now().date().isoformat(), source),
             )
 
+    def paid_count(self, since: str | None = None) -> int:
+        with self._conn() as c:
+            return c.execute("SELECT COUNT(*) FROM orders WHERE paid_at IS NOT NULL AND created_at >= ?", (since or "0000",)).fetchone()[0]
+
     def funnel(self, since: str | None = None) -> list[dict]:
         """Visitors, previews, reservations and paid orders per link tag."""
         since = since or "0000"
@@ -179,13 +193,14 @@ class Store:
         with self._conn() as c:
             for r in c.execute("SELECT source, SUM(n) AS n FROM visits WHERE day >= ? GROUP BY source", (since[:10],)):
                 row(r["source"])["visits"] = r["n"]
-            for r in c.execute("SELECT source, status, COUNT(*) AS n FROM orders WHERE created_at >= ? GROUP BY source, status", (since,)):
+            for r in c.execute(
+                "SELECT source, COUNT(*) AS previews, COUNT(reserved_at) AS preorders, COUNT(paid_at) AS paid "
+                "FROM orders WHERE created_at >= ? GROUP BY source", (since,)
+            ):
                 x = row(r["source"])
-                x["previews"] += r["n"]
-                if r["status"] == "preorder":
-                    x["preorders"] += r["n"]
-                elif r["status"] in PAID_STATUSES:
-                    x["paid"] += r["n"]
+                x["previews"] += r["previews"]
+                x["preorders"] += r["preorders"]
+                x["paid"] += r["paid"]
         return sorted(rows.values(), key=lambda x: (-x["paid"], -x["visits"]))
 
     def preorders(self) -> list[Order]:

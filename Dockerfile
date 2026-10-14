@@ -19,4 +19,5 @@ VOLUME ["/data"]
 EXPOSE 8000
 
 # One worker: background book writing and the rate limiter live in this process.
-CMD ["uvicorn", "chartbook.web.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--proxy-headers"]
+# The host's load balancer sits in front, so trust its X-Forwarded-For header to see real visitor addresses.
+CMD ["uvicorn", "chartbook.web.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--proxy-headers", "--forwarded-allow-ips", "*"]

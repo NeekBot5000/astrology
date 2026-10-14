@@ -219,9 +219,11 @@ def test_admin_stats_needs_token(tmp_path, monkeypatch):
     start_preview(client)
     order_id = start_preview(client)
     client.post(f"/p/{order_id}/checkout", data={"email": "a@b.co"})
-    assert client.get("/admin/stats").status_code == 404
-    assert client.get("/admin/stats?token=wrong").status_code == 404
-    r = client.get("/admin/stats?token=s3cret-token")
+    assert client.get("/admin/stats").status_code == 401
+    assert client.get("/admin/stats", auth=("owner", "wrong")).status_code == 401
+    assert client.get("/admin/stats", auth=("owner", "é-not-ascii")).status_code == 401
+    assert client.get("/admin/stats?token=s3cret-token").status_code == 401  # tokens in URLs are not accepted
+    r = client.get("/admin/stats", auth=("owner", "s3cret-token"))
     assert r.status_code == 200
     assert "<td>2</td>" in r.text and "50.0%" in r.text
 
@@ -229,7 +231,7 @@ def test_admin_stats_needs_token(tmp_path, monkeypatch):
 def test_admin_stats_disabled_without_token(tmp_path, monkeypatch):
     monkeypatch.delenv("ADMIN_TOKEN", raising=False)
     client, *_ = make_client(tmp_path, monkeypatch)
-    assert client.get("/admin/stats?token=").status_code == 404
+    assert client.get("/admin/stats", auth=("owner", "")).status_code == 404
 
 
 def test_download_filename_is_sanitized(tmp_path, monkeypatch):
@@ -252,7 +254,7 @@ def test_link_tags_credit_visits_and_orders(tmp_path, monkeypatch):
     client.get("/", headers={"user-agent": "Googlebot/2.1"})  # bots aren't counted
     rows = {r["source"]: r for r in app.state.store.funnel()}
     assert rows["tiktok"] == {"source": "tiktok", "visits": 1, "previews": 1, "preorders": 1, "paid": 0}
-    assert "tiktok" in client.get("/admin/stats?token=tok").text
+    assert "tiktok" in client.get("/admin/stats", auth=("x", "tok")).text
 
 
 def test_preorder_export_and_later_purchase(tmp_path, monkeypatch):
@@ -260,15 +262,24 @@ def test_preorder_export_and_later_purchase(tmp_path, monkeypatch):
     client, app, *_ = make_client(tmp_path, monkeypatch)
     order_id = start_preview(client)
     client.post(f"/p/{order_id}/checkout", data={"email": "sam@example.com"})
-    csv_text = client.get("/admin/preorders.csv?token=tok").text
+    csv_text = client.get("/admin/preorders.csv", auth=("x", "tok")).text
     assert "sam@example.com" in csv_text and f"/p/{order_id}" in csv_text
-    assert client.get("/admin/preorders.csv?token=nope").status_code == 404
+    assert client.get("/admin/preorders.csv", auth=("x", "nope")).status_code == 401
 
     # Later, payments are switched on: the same link now leads to checkout.
     paid_client, paid_app, stripe, _ = make_client(tmp_path, monkeypatch, payments=True)
     assert "Continue to secure payment" in paid_client.get(f"/p/{order_id}").text
-    r = paid_client.post(f"/p/{order_id}/checkout", data={"email": "sam@example.com"}, follow_redirects=False)
-    assert r.status_code == 303 and paid_app.state.store.get(order_id).status == "awaiting_payment"
+    r = paid_client.post(f"/p/{order_id}/checkout", data={"email": ""}, follow_redirects=False)
+    order = paid_app.state.store.get(order_id)
+    assert r.status_code == 303 and order.status == "awaiting_payment"
+    assert order.email == "sam@example.com"  # blank field keeps the reservation email
+    assert stripe.created[0]["customer_email"] == "sam@example.com"
+
+    # An old reservation that starts (or abandons) checkout is not purged as an abandoned preview.
+    with paid_app.state.store._conn() as c:
+        c.execute("UPDATE orders SET created_at = '2026-01-01', checkout_at = '2026-01-02' WHERE id = ?", (order_id,))
+    paid_app.state.store.purge(30)
+    assert paid_app.state.store.get(order_id).status == "awaiting_payment"
 
 
 def test_reservations_are_purged_after_120_days(tmp_path, monkeypatch):
@@ -278,5 +289,36 @@ def test_reservations_are_purged_after_120_days(tmp_path, monkeypatch):
     store = app.state.store
     assert store.purge(30) == 0
     with store._conn() as c:
-        c.execute("UPDATE orders SET created_at = '2000-01-01' WHERE id = ?", (order_id,))
+        c.execute("UPDATE orders SET reserved_at = '2000-01-01' WHERE id = ?", (order_id,))
     assert store.purge(30) == 1 and store.get(order_id).email is None
+
+
+def test_paid_count_survives_erasing(tmp_path, monkeypatch):
+    monkeypatch.setenv("ADMIN_TOKEN", "tok")
+    client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
+    monkeypatch.setattr("chartbook.web.pipeline.render_pdf", lambda html, out: (out.write_bytes(b"%PDF-fake"), out)[1])
+    order_id = start_preview(client)
+    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
+    client.get(f"/order/{order_id}?session_id=cs_test_1")
+    client.post(f"/order/{order_id}/delete")
+    assert app.state.store.paid_count() == 1
+    assert app.state.store.funnel()[0]["paid"] == 1
+
+
+def test_make_book_refuses_non_pdf_output(capsys, monkeypatch):
+    import sys
+
+    from chartbook import make_book
+
+    monkeypatch.setattr(sys, "argv", ["make_book", "--from-json", "samples/maya.json", "--out", "book.json"])
+    with pytest.raises(SystemExit):
+        make_book.main()
+    assert "must end in .pdf" in capsys.readouterr().err
+
+
+def test_bot_filter_spares_real_phones():
+    from chartbook.web.app import BOT_UA
+
+    assert BOT_UA.search("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+    assert BOT_UA.search("Slackbot-LinkExpanding 1.0")
+    assert not BOT_UA.search("Mozilla/5.0 (Linux; Android 12; CUBOT_X30) AppleWebKit/537.36 Chrome/120 Mobile")

@@ -12,9 +12,9 @@ Newest entries go at the top. Each entry: date, what was done, what was verified
 - `make_book` command, Dockerfile, `docs/DEPLOY.md`, `docs/LAUNCH_PLAN.md`.
 
 **Verified**
-- 37 automated tests pass (38 with the PDF test, which needs Chromium): chart accuracy, writer validation and retry using a fake AI, the full paid flow using a fake Stripe (payment → writing → download → delete), webhook signature check, no double writing, purge rules, link tracking.
+- 41 automated tests pass (the PDF test needs Chromium): chart accuracy, writer validation and retry using a fake AI, the full paid flow using a fake Stripe (payment → writing → download → delete), webhook signature check, no double writing, purge rules, link tracking.
 - Accessibility: automated axe-core scan clean on all pages; contrast fixed (input borders, focus ring, wheel labels); keyboard order checked; no sideways scrolling at 320 px or 200% text.
-- A security review of the whole branch found no high-confidence issues.
+- A security review of the whole branch found no high-confidence issues. A code review found 10 bugs (e.g. a reservation could be erased mid-checkout, paid sales vanished from stats after deletion, rate limit broken behind a hosting proxy); all fixed with tests.
 
 **NOT verified (needs the owner's accounts or a normal network)**
 - A real Claude-written book: no API key in the build sandbox. The writer is tested with a fake.
