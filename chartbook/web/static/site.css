@@ -154,3 +154,10 @@ details p { margin: 10px 0 0; }
 
 .site-footer { padding: 40px 0 56px; font-size: 14px; color: var(--muted); }
 .site-footer a { color: var(--muted); }
+
+table.stats { width: 100%; border-collapse: collapse; font-size: 18px; margin-bottom: 16px; }
+table.stats th { text-align: left; font-weight: 400; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+table.stats td { text-align: right; font-weight: 600; border-bottom: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
+table.funnel th, table.funnel td { text-align: right; padding: 8px 6px; font-size: 16px; }
+table.funnel th:first-child { text-align: left; }
+table.funnel thead th { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }

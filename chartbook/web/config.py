@@ -18,6 +18,7 @@ class Settings:
     anthropic_configured: bool
     keep_days: int  # how long finished books and birth details are kept
     support_email: str
+    admin_token: str | None = None
 
     @property
     def payments_enabled(self) -> bool:
@@ -42,4 +43,5 @@ def load_settings() -> Settings:
         anthropic_configured=bool(env.get("ANTHROPIC_API_KEY") or env.get("ANTHROPIC_AUTH_TOKEN")),
         keep_days=int(env.get("KEEP_DAYS", "30")),
         support_email=env.get("SUPPORT_EMAIL", "support@example.com"),
+        admin_token=env.get("ADMIN_TOKEN") or None,
     )

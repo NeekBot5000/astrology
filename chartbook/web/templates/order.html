@@ -12,7 +12,14 @@
   <div class="status-card" role="status" aria-live="polite">
   {% if order.status == "preorder" %}
     <h2>You're on the list</h2>
+    {% if payments %}
+    <p>Good news: ordering is open. <a class="btn btn-dark" href="/p/{{ order.id }}">Get {{ order.name }}'s book</a></p>
+    {% else %}
     <p>We've reserved {{ order.name }}'s book and will email {{ order.email }} as soon as it's ready to order. There's nothing to pay until then, and you can change your mind any time.</p>
+    {% endif %}
+    <form method="post" action="/order/{{ order.id }}/delete">
+      <p class="small">Changed your mind? <button class="linkish" type="submit">Cancel the reservation and erase the details</button>.</p>
+    </form>
   {% elif order.status == "awaiting_payment" %}
     <p><span class="spinner" aria-hidden="true"></span>Waiting for the payment to be confirmed. This page refreshes on its own.</p>
     <p class="small">Closed the payment page by accident? <a href="/p/{{ order.id }}">Go back to the preview</a>.</p>

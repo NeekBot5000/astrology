@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import secrets
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, fields
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -31,12 +33,21 @@ CREATE TABLE IF NOT EXISTS orders (
     stripe_session TEXT,
     error TEXT,
     pdf_path TEXT,
-    ready_at TEXT
+    ready_at TEXT,
+    source TEXT
+);
+CREATE TABLE IF NOT EXISTS visits (
+    day TEXT NOT NULL,
+    source TEXT NOT NULL,
+    n INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, source)
 );
 """
 
 # preview -> (awaiting_payment -> paid | preorder) -> writing -> ready | failed ; any -> deleted
 STATUSES = {"preview", "awaiting_payment", "preorder", "paid", "writing", "ready", "failed", "deleted"}
+PREORDER_DAYS = 120
+PAID_STATUSES = ("paid", "writing", "ready", "failed")
 PERSONAL = ("name", "email", "birth_date", "birth_time", "place_name", "latitude", "longitude", "tz", "dedication")
 
 
@@ -59,6 +70,7 @@ class Order:
     error: str | None = None
     pdf_path: str | None = None
     ready_at: str | None = None
+    source: str | None = None  # marketing link tag, e.g. "tiktok"
 
     @property
     def focus_set(self) -> set[str]:
@@ -74,11 +86,20 @@ class Store:
         self.path = str(path)
         with self._conn() as c:
             c.executescript(SCHEMA)
+            cols = {r["name"] for r in c.execute("PRAGMA table_info(orders)")}
+            if "source" not in cols:  # databases created before link tags existed
+                c.execute("ALTER TABLE orders ADD COLUMN source TEXT")
 
-    def _conn(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.path)
+    @contextmanager
+    def _conn(self) -> Iterator[sqlite3.Connection]:
+        """A connection that commits on success, rolls back on error, and always closes."""
+        conn = sqlite3.connect(self.path, timeout=10)
         conn.row_factory = sqlite3.Row
-        return conn
+        try:
+            with conn:
+                yield conn
+        finally:
+            conn.close()
 
     def create(self, **values) -> Order:
         order = Order(id=secrets.token_urlsafe(16), created_at=now().isoformat(), status="preview", **values)
@@ -124,19 +145,59 @@ class Store:
         self.update(order_id, status="deleted", pdf_path=None, **{k: None for k in PERSONAL})
 
     def purge(self, keep_days: int) -> int:
-        """Erase finished orders after keep_days and abandoned previews after 2 days."""
+        """Erase finished orders after keep_days, abandoned previews after 2 days and reservations after 120 days."""
         cutoff_ready = (now() - timedelta(days=keep_days)).isoformat()
         cutoff_preview = (now() - timedelta(days=2)).isoformat()
+        cutoff_preorder = (now() - timedelta(days=PREORDER_DAYS)).isoformat()
         with self._conn() as c:
             ids = [r["id"] for r in c.execute(
                 "SELECT id FROM orders WHERE (status IN ('ready', 'failed') AND COALESCE(ready_at, created_at) < ?) "
-                "OR (status IN ('preview', 'awaiting_payment') AND created_at < ?)",
-                (cutoff_ready, cutoff_preview),
+                "OR (status IN ('preview', 'awaiting_payment') AND created_at < ?) "
+                "OR (status = 'preorder' AND created_at < ?)",
+                (cutoff_ready, cutoff_preview, cutoff_preorder),
             )]
         for i in ids:
             self.erase(i)
         return len(ids)
 
-    def counts(self) -> dict[str, int]:
+    def count_visit(self, source: str) -> None:
         with self._conn() as c:
-            return {r["status"]: r["n"] for r in c.execute("SELECT status, COUNT(*) AS n FROM orders GROUP BY status")}
+            c.execute(
+                "INSERT INTO visits (day, source, n) VALUES (?, ?, 1) "
+                "ON CONFLICT(day, source) DO UPDATE SET n = n + 1",
+                (now().date().isoformat(), source),
+            )
+
+    def funnel(self, since: str | None = None) -> list[dict]:
+        """Visitors, previews, reservations and paid orders per link tag."""
+        since = since or "0000"
+        rows: dict[str, dict] = {}
+
+        def row(src):
+            return rows.setdefault(src or "direct", {"source": src or "direct", "visits": 0, "previews": 0, "preorders": 0, "paid": 0})
+
+        with self._conn() as c:
+            for r in c.execute("SELECT source, SUM(n) AS n FROM visits WHERE day >= ? GROUP BY source", (since[:10],)):
+                row(r["source"])["visits"] = r["n"]
+            for r in c.execute("SELECT source, status, COUNT(*) AS n FROM orders WHERE created_at >= ? GROUP BY source, status", (since,)):
+                x = row(r["source"])
+                x["previews"] += r["n"]
+                if r["status"] == "preorder":
+                    x["preorders"] += r["n"]
+                elif r["status"] in PAID_STATUSES:
+                    x["paid"] += r["n"]
+        return sorted(rows.values(), key=lambda x: (-x["paid"], -x["visits"]))
+
+    def preorders(self) -> list[Order]:
+        with self._conn() as c:
+            rows = c.execute("SELECT * FROM orders WHERE status = 'preorder' ORDER BY created_at").fetchall()
+        return [Order(**dict(r)) for r in rows]
+
+    def counts(self, since: str | None = None) -> dict[str, int]:
+        """Orders per status, optionally only those created on or after `since` (ISO date)."""
+        query, args = "SELECT status, COUNT(*) AS n FROM orders", []
+        if since:
+            query += " WHERE created_at >= ?"
+            args.append(since)
+        with self._conn() as c:
+            return {r["status"]: r["n"] for r in c.execute(query + " GROUP BY status", args)}

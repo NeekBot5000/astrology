@@ -211,3 +211,72 @@ def test_sample_book_renders_to_pdf(tmp_path):
     assert "For Maya" in html and "Venus in Gemini, 12th house" in html
     out = render_pdf(html, tmp_path / "maya.pdf")
     assert out.read_bytes().startswith(b"%PDF") and out.stat().st_size > 100_000
+
+
+def test_admin_stats_needs_token(tmp_path, monkeypatch):
+    monkeypatch.setenv("ADMIN_TOKEN", "s3cret-token")
+    client, app, *_ = make_client(tmp_path, monkeypatch)
+    start_preview(client)
+    order_id = start_preview(client)
+    client.post(f"/p/{order_id}/checkout", data={"email": "a@b.co"})
+    assert client.get("/admin/stats").status_code == 404
+    assert client.get("/admin/stats?token=wrong").status_code == 404
+    r = client.get("/admin/stats?token=s3cret-token")
+    assert r.status_code == 200
+    assert "<td>2</td>" in r.text and "50.0%" in r.text
+
+
+def test_admin_stats_disabled_without_token(tmp_path, monkeypatch):
+    monkeypatch.delenv("ADMIN_TOKEN", raising=False)
+    client, *_ = make_client(tmp_path, monkeypatch)
+    assert client.get("/admin/stats?token=").status_code == 404
+
+
+def test_download_filename_is_sanitized(tmp_path, monkeypatch):
+    client, app, stripe, writer = make_client(tmp_path, monkeypatch, payments=True)
+    monkeypatch.setattr("chartbook.web.pipeline.render_pdf", lambda html, out: (out.write_bytes(b"%PDF-fake"), out)[1])
+    order_id = start_preview(client, name='Zoë "Z" Ann')
+    client.post(f"/p/{order_id}/checkout", data={}, follow_redirects=False)
+    client.get(f"/order/{order_id}?session_id=cs_test_1")
+    r = client.get(f"/order/{order_id}/book.pdf")
+    assert 'filename="Zo-Z-Ann-birth-sky.pdf"' in r.headers["content-disposition"]
+
+
+def test_link_tags_credit_visits_and_orders(tmp_path, monkeypatch):
+    monkeypatch.setenv("ADMIN_TOKEN", "tok")
+    client, app, *_ = make_client(tmp_path, monkeypatch)
+    client.get("/?src=TikTok")  # tag is normalized and remembered in a cookie
+    order_id = start_preview(client)
+    client.post(f"/p/{order_id}/checkout", data={"email": "a@b.co"})
+    assert app.state.store.get(order_id).source == "tiktok"
+    client.get("/", headers={"user-agent": "Googlebot/2.1"})  # bots aren't counted
+    rows = {r["source"]: r for r in app.state.store.funnel()}
+    assert rows["tiktok"] == {"source": "tiktok", "visits": 1, "previews": 1, "preorders": 1, "paid": 0}
+    assert "tiktok" in client.get("/admin/stats?token=tok").text
+
+
+def test_preorder_export_and_later_purchase(tmp_path, monkeypatch):
+    monkeypatch.setenv("ADMIN_TOKEN", "tok")
+    client, app, *_ = make_client(tmp_path, monkeypatch)
+    order_id = start_preview(client)
+    client.post(f"/p/{order_id}/checkout", data={"email": "sam@example.com"})
+    csv_text = client.get("/admin/preorders.csv?token=tok").text
+    assert "sam@example.com" in csv_text and f"/p/{order_id}" in csv_text
+    assert client.get("/admin/preorders.csv?token=nope").status_code == 404
+
+    # Later, payments are switched on: the same link now leads to checkout.
+    paid_client, paid_app, stripe, _ = make_client(tmp_path, monkeypatch, payments=True)
+    assert "Continue to secure payment" in paid_client.get(f"/p/{order_id}").text
+    r = paid_client.post(f"/p/{order_id}/checkout", data={"email": "sam@example.com"}, follow_redirects=False)
+    assert r.status_code == 303 and paid_app.state.store.get(order_id).status == "awaiting_payment"
+
+
+def test_reservations_are_purged_after_120_days(tmp_path, monkeypatch):
+    client, app, *_ = make_client(tmp_path, monkeypatch)
+    order_id = start_preview(client)
+    client.post(f"/p/{order_id}/checkout", data={"email": "sam@example.com"})
+    store = app.state.store
+    assert store.purge(30) == 0
+    with store._conn() as c:
+        c.execute("UPDATE orders SET created_at = '2000-01-01' WHERE id = ?", (order_id,))
+    assert store.purge(30) == 1 and store.get(order_id).email is None

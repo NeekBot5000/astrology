@@ -5,7 +5,11 @@ Run locally:  uvicorn chartbook.web.app:app --reload
 
 from __future__ import annotations
 
+import csv
+import hmac
+import io
 import logging
+import re
 import time as _time
 from collections import defaultdict, deque
 from datetime import date, time
@@ -44,6 +48,7 @@ SIGN_STYLE = {
     "Aquarius": "independent, inventive and guided by ideals",
     "Pisces": "imaginative, empathetic and deeply intuitive",
 }
+BOT_UA = re.compile(r"bot|crawl|spider|slurp|preview|monitor|curl|python-requests", re.I)
 FOCUS_LABELS = {"love": "Love and relationships", "career": "Work and calling", "growth": "Personal growth"}
 
 
@@ -116,8 +121,15 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         return response
 
     @app.get("/", response_class=HTMLResponse)
-    def index(request: Request):
-        return page(request, "index.html", form={}, errors=[], **landing)
+    def index(request: Request, src: str = ""):
+        tag = re.sub(r"[^a-z0-9-]", "", src.lower())[:30]
+        response = page(request, "index.html", form={}, errors=[], **landing)
+        if not BOT_UA.search(request.headers.get("user-agent", "")):
+            store.count_visit(tag or request.cookies.get("src") or "direct")
+        if tag:
+            # Remember which link brought this visitor, so a later purchase can be credited to it.
+            response.set_cookie("src", tag, max_age=30 * 86400, samesite="lax", httponly=True)
+        return response
 
     @app.post("/preview")
     def preview(
@@ -188,8 +200,13 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
             name=name, birth_date=bdate.isoformat(), birth_time=btime.strftime("%H:%M") if btime else None,
             place_name=found.name, latitude=found.latitude, longitude=found.longitude, tz=found.tz_name,
             focus=",".join(focus), dedication=dedication or None,
+            source=re.sub(r"[^a-z0-9-]", "", request.cookies.get("src", ""))[:30] or None,
         )
         return RedirectResponse(f"/p/{order.id}", status_code=303)
+
+    def buyable_statuses() -> tuple[str, ...]:
+        # People who reserved a copy can buy from their link once payments are switched on.
+        return ("preview", "awaiting_payment", "preorder") if settings.payments_enabled else ("preview", "awaiting_payment")
 
     def _order_or_404(order_id: str):
         order = store.get(order_id)
@@ -200,7 +217,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     @app.get("/p/{order_id}", response_class=HTMLResponse)
     def show_preview(request: Request, order_id: str):
         order = _order_or_404(order_id)
-        if order.status not in ("preview", "awaiting_payment"):
+        if order.status not in buyable_statuses():
             return RedirectResponse(f"/order/{order.id}", status_code=303)
         from .pipeline import order_chart
 
@@ -223,7 +240,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     @app.post("/p/{order_id}/checkout")
     def checkout(order_id: str, email: str = Form("")):
         order = _order_or_404(order_id)
-        if order.status not in ("preview", "awaiting_payment"):
+        if order.status not in buyable_statuses():
             return RedirectResponse(f"/order/{order.id}", status_code=303)
         email = email.strip()[:200] or None
         if not settings.payments_enabled:
@@ -271,7 +288,8 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         order = _order_or_404(order_id)
         if order.status != "ready" or not order.pdf_path or not Path(order.pdf_path).exists():
             raise HTTPException(404)
-        filename = f"{order.name}-birth-sky.pdf".replace(" ", "-")
+        safe_name = re.sub(r"[^A-Za-z0-9-]+", "-", order.name).strip("-") or "your"
+        filename = f"{safe_name}-birth-sky.pdf"
         return FileResponse(order.pdf_path, media_type="application/pdf", filename=filename)
 
     @app.post("/order/{order_id}/delete")
@@ -308,6 +326,34 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     @app.get("/policies", response_class=HTMLResponse)
     def policies(request: Request):
         return page(request, "policies.html")
+
+    @app.get("/admin/stats", response_class=HTMLResponse)
+    def stats(request: Request, token: str = "", since: str = ""):
+        """Pre-sale test numbers for the owner. Protected by ADMIN_TOKEN; disabled when it is unset."""
+        if not settings.admin_token or not hmac.compare_digest(token, settings.admin_token):
+            raise HTTPException(404)
+        counts = store.counts(since or None)
+        # Rows are erased over time, but their status survives as "deleted"; count every row as a preview.
+        previews = sum(counts.values())
+        reached = {
+            "preorder": counts.get("preorder", 0),
+            "paid": sum(counts.get(s, 0) for s in ("paid", "writing", "ready", "failed")),
+        }
+        return page(request, "stats.html", counts=counts, previews=previews, reached=reached, since=since,
+                    funnel=store.funnel(since or None))
+
+    @app.get("/admin/preorders.csv")
+    def preorders_csv(token: str = ""):
+        """Emails of people who reserved a copy, so the owner can tell them when ordering opens."""
+        if not settings.admin_token or not hmac.compare_digest(token, settings.admin_token):
+            raise HTTPException(404)
+        out = io.StringIO()
+        w = csv.writer(out)
+        w.writerow(["reserved_at", "email", "name", "order_link", "link_tag"])
+        for o in store.preorders():
+            w.writerow([o.created_at[:10], o.email, o.name, f"{settings.base_url}/p/{o.id}", o.source or ""])
+        return Response(out.getvalue(), media_type="text/csv",
+                        headers={"Content-Disposition": 'attachment; filename="preorders.csv"'})
 
     @app.get("/health")
     def health():
