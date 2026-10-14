@@ -9,7 +9,7 @@
 <h2>Responsible for content</h2>
 <p>{{ legal.name }}, address as above.</p>
 <h2>Consumer dispute resolution</h2>
-<p>We are not obliged, and not willing, to take part in dispute resolution proceedings before a consumer arbitration board. Please contact us directly; we'll do our best to resolve any issue.</p>
+<p>{% if legal.eu %}We are not obliged, and not willing, to take part in dispute resolution proceedings before a consumer arbitration board. {% endif %}Please contact us directly; we'll do our best to resolve any issue.</p>
 <h2>Credits</h2>
 <p>Planet positions: Swiss Ephemeris by Astrodienst AG. Place search: © OpenStreetMap contributors (Nominatim). Time zones: timezonefinder. Fonts: Cormorant Garamond and Source Serif 4 (SIL Open Font License). Book text written with an AI model from Anthropic.</p>
 {% endblock %}

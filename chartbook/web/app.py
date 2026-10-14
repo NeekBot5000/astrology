@@ -84,7 +84,15 @@ EU_COUNTRIES = {
     "austria", "belgium", "bulgaria", "croatia", "cyprus", "czechia", "czech republic", "denmark", "estonia", "finland",
     "france", "germany", "greece", "hungary", "ireland", "italy", "latvia", "lithuania", "luxembourg", "malta",
     "netherlands", "poland", "portugal", "romania", "slovakia", "slovenia", "spain", "sweden",
+    # common local names and codes
+    "deutschland", "österreich", "osterreich", "nederland", "france", "españa", "espana", "italia", "polska", "sverige",
+    "danmark", "suomi", "belgië", "belgique", "éire", "eire", "at", "de", "nl", "fr", "es", "it", "be", "ie", "eu",
 }
+
+
+def is_eu_country(name: str | None) -> bool:
+    key = re.sub(r"^the\s+", "", (name or "").strip().lower())
+    return key in EU_COUNTRIES
 
 
 def legal_context(settings: Settings) -> dict:
@@ -96,9 +104,10 @@ def legal_context(settings: Settings) -> dict:
         "address": address,
         "address_html": "<br>".join(html_escape(part.strip()) for part in address.split(",")),
         "country": settings.legal_country or "[country]",
+        "country_set": bool(settings.legal_country),
         "vat_id": settings.vat_id,
         "effective": settings.legal_effective_date,
-        "eu": (settings.legal_country or "").strip().lower() in EU_COUNTRIES,
+        "eu": is_eu_country(settings.legal_country),
     }
 
 
@@ -265,7 +274,8 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     def show_preview(request: Request, order_id: str):
         return render_preview(request, order_id)
 
-    def render_preview(request: Request, order_id: str, error: str | None = None, status_code: int = 200):
+    def render_preview(request: Request, order_id: str, error: str | None = None, status_code: int = 200,
+                       email: str | None = None):
         order = _order_or_404(order_id)
         if order.status not in buyable_statuses():
             return RedirectResponse(f"/order/{order.id}", status_code=303)
@@ -282,7 +292,7 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         bdate = date.fromisoformat(order.birth_date)
         focus_text = " and ".join(FOCUS_LABELS[f].lower() for f in sorted(order.focus_set))
         return page(
-            request, "preview.html", status_code=status_code, error=error, order=order, wheel=render_wheel(chart, 600, f"{order.name}'s birth chart"),
+            request, "preview.html", status_code=status_code, error=error, order=order, email=email or order.email or "", wheel=render_wheel(chart, 600, f"{order.name}'s birth chart"),
             teasers=teasers, chart=chart, focus_text=focus_text, birth_date_text=f"{bdate.day} {bdate:%B %Y}",
             birth_time_text=time_text(time.fromisoformat(order.birth_time)) if order.birth_time else None,
         )
@@ -292,12 +302,12 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
         order = _order_or_404(order_id)
         if order.status not in buyable_statuses():
             return RedirectResponse(f"/order/{order.id}", status_code=303)
+        email = email.strip()[:200] or order.email  # keep the reservation email if the field is left blank
         if settings.payments_enabled and not agree:
             # EU/UK law: for instant digital delivery the buyer must agree to immediate supply and acknowledge
             # that the withdrawal right ends on delivery. We also need acceptance of the terms.
             return render_preview(request, order_id, error="Please tick the box to agree to the terms before paying.",
-                                  status_code=422)
-        email = email.strip()[:200] or order.email  # keep the reservation email if the field is left blank
+                                  status_code=422, email=email)
         if not settings.payments_enabled:
             # Pre-order mode: no payment taken yet; we just record interest.
             if not email or "@" not in email:
@@ -387,9 +397,9 @@ def create_app(settings: Settings | None = None, geocode=lookup_place, writer_cl
     def sample_pdf():
         return FileResponse(ROOT / "samples/maya-sample.pdf", media_type="application/pdf", filename="sample-birth-sky-book.pdf")
 
-    @app.get("/policies", response_class=HTMLResponse)
-    def policies(request: Request):
-        return page(request, "policies.html")
+    @app.get("/policies")
+    def policies():
+        return RedirectResponse("/terms", status_code=301)  # old address, kept so earlier links still work
 
     @app.get("/terms", response_class=HTMLResponse)
     def terms(request: Request):

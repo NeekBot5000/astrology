@@ -20,8 +20,8 @@ class Settings:
     support_email: str
     admin_token: str | None = None
     review_books: bool = False  # owner approves each book before the customer can download it
-    # Business details shown on the legal pages. Until legal_name and legal_address are set,
-    # those pages show a visible "draft" banner and placeholders.
+    # Business details shown on the legal pages. Until legal_name, legal_address and legal_country
+    # are all set, those pages show a visible "draft" banner and placeholders.
     legal_name: str | None = None
     legal_address: str | None = None
     legal_country: str | None = None  # whose law governs the terms, e.g. "Germany"

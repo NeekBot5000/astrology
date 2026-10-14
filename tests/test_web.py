@@ -397,7 +397,6 @@ def test_preview_error_text_cannot_be_injected_from_the_url(tmp_path, monkeypatc
     ("/privacy", "Who we share data with"),
     ("/refunds", "Model withdrawal form"),
     ("/legal-notice", "Provider"),
-    ("/policies", "Our policies"),
 ])
 def test_legal_pages_render_with_draft_banner_until_configured(tmp_path, monkeypatch, path, needle):
     for var in ("LEGAL_NAME", "LEGAL_ADDRESS", "LEGAL_COUNTRY"):
@@ -405,8 +404,9 @@ def test_legal_pages_render_with_draft_banner_until_configured(tmp_path, monkeyp
     client, *_ = make_client(tmp_path, monkeypatch)
     r = client.get(path)
     assert r.status_code == 200 and needle in r.text
-    if path != "/policies":
-        assert "draft-banner" in r.text and "[Your full legal name" in r.text
+    assert "draft-banner" in r.text and "[Your full legal name" in r.text
+    if path == "/privacy":
+        assert "[Name your supervisory authority here.]" in r.text
 
 
 def test_legal_pages_use_business_details(tmp_path, monkeypatch):
@@ -420,3 +420,37 @@ def test_legal_pages_use_business_details(tmp_path, monkeypatch):
     terms = client.get("/terms").text
     assert "governed by the law of Germany" in terms and "In effect from 2026-11-02" in terms
     assert "consumer arbitration board" in terms  # shown for EU sellers
+
+
+def test_old_policies_address_redirects(tmp_path, monkeypatch):
+    client, *_ = make_client(tmp_path, monkeypatch)
+    r = client.get("/policies", follow_redirects=False)
+    assert r.status_code == 301 and r.headers["location"] == "/terms"
+
+
+@pytest.mark.parametrize("country,eu", [("Germany", True), ("The Netherlands", True), ("Deutschland", True),
+                                        (" germany ", True), ("United States", False), (None, False)])
+def test_eu_country_detection(country, eu):
+    from chartbook.web.app import is_eu_country
+
+    assert is_eu_country(country) is eu
+
+
+def test_consent_error_keeps_email_and_start_again_keeps_link_tag(tmp_path, monkeypatch):
+    client, *_ = make_client(tmp_path, monkeypatch, payments=True)
+    order_id = start_preview(client, src="tiktok")
+    r = client.post(f"/p/{order_id}/checkout", data={"email": "kept@example.com"})
+    assert r.status_code == 422 and 'value="kept@example.com"' in r.text
+    assert 'href="/?src=tiktok#start"' in r.text
+
+
+def test_showcase_glyphs_match_the_book():
+    import json
+    import re
+    from pathlib import Path
+
+    from chartbook.glyphs import BODY_GLYPHS, SIGN_GLYPHS
+
+    js = Path("showcase/wheel.js").read_text()
+    data = json.loads(re.search(r"var GLYPHS = (\{.*?\});\n", js, re.S).group(1))
+    assert data == {"signs": SIGN_GLYPHS, "bodies": BODY_GLYPHS}, "regenerate showcase/wheel.js from chartbook/glyphs.py"

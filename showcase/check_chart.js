@@ -1,5 +1,5 @@
 // Compare the browser chart maths with Swiss Ephemeris reference values.
-// Usage: node showcase/check_chart.js reference.json   (needs: npm install astronomy-engine@2.1.19)
+// Usage: see showcase/make_reference.py (creates reference.json), then: node showcase/check_chart.js reference.json
 const fs = require("fs");
 const BirthChart = require("./chart.js");
 const cases = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
@@ -18,5 +18,5 @@ for (const c of cases) {
 }
 for (const [k, v] of Object.entries(worst)) console.log(k.padEnd(10), (v * 60).toFixed(2), "arcmin max");
 console.log("retrograde mismatches:", retroMismatch, "of", cases.length * 10);
-const bad = Object.values(worst).some(v => v > 1 / 60 * 3);
+const bad = Object.values(worst).some(v => v > 1 / 60 * 3) || retroMismatch > 0;
 process.exit(bad ? 1 : 0);

@@ -337,9 +337,11 @@ footer p + p { margin-top: 8px; }
     var OUTER = { Uranus: 1, Neptune: 1, Pluto: 1 };
     var personal = chart.aspects.filter(function (a) { return !(OUTER[a.body1] && OUTER[a.body2]); });
     var top = personal.slice(0, 2).map(function (a) { return a.body1 + " " + ASPECT_WORDS[a.kind] + " " + a.body2; });
-    $("teaser-text").textContent = "That's " + (big.length === 3 ? "three" : "two") + " of the " + points + " points in this chart, and there are " +
-      personal.length + " personal angles between planets, the closest being " + top.join(" and ") +
-      ". The book reads them all together, chapter by chapter: personality, mind, love, work, home, growth and direction.";
+    var angleText = personal.length
+      ? ", and there are " + personal.length + " personal angles between planets, the closest being " + top.join(" and ")
+      : "";
+    $("teaser-text").textContent = "That's " + (big.length === 3 ? "three" : "two") + " of the " + points + " points in this chart" +
+      angleText + ". The book reads them all together, chapter by chapter: personality, mind, love, work, home, growth and direction.";
   }
 
   $("chart-form").addEventListener("submit", function (e) { e.preventDefault(); draw(); });
@@ -351,7 +353,9 @@ footer p + p { margin-top: 8px; }
     if (!downloads) { status.textContent = "Downloads aren't available in this view."; return; }
     status.textContent = "Preparing the PDF…";
     try {
-      var blob = await (await fetch("maya-sample.pdf")).blob();
+      var res = await fetch("maya-sample.pdf");
+      if (!res.ok) throw new Error("missing file");
+      var blob = await res.blob();
       await downloads.save({ filename: "birth-sky-sample-book.pdf", data: blob });
       status.textContent = "Saved.";
     } catch (e) {

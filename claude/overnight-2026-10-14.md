@@ -8,9 +8,6 @@ STARTED: 04:57 UTC   ENDS: 12:57 UTC (8 hours; no duration was given)
 - "Publish" therefore means: a working pre-sale page published as a private claude.ai Artifact. The owner decides whether to share the link.
 
 ## QUEUE
-[ ] 4. Brand-name shortlist with screening notes (owner decides; I can't check trademarks or domains)
-[ ] 5. Marketing content pack: 10 short-video scripts, Reddit post drafts, Pinterest captions, launch email to the waitlist
-[ ] 6. Update LAUNCH_PLAN and DEPLOY for the Artifact-first route
 [ ] 7. Review and polish: re-read tonight's work, run all tests, follow README steps literally in a fresh environment
 [ ] 8. Open questions write-up with options and recommendations
 [ ] 9. PROGRESS.md entry, final report, commit and push
@@ -28,5 +25,12 @@ STARTED: 04:57 UTC   ENDS: 12:57 UTC (8 hours; no duration was given)
     site now sets NO cookies (link tag moved to hidden form field); AI disclosure + personal-use line in the book;
     docs/legal/LEGAL_CHECKLIST.md (tax, registration, Stripe restricted-business risk, DPAs, licences, facts to verify).
     Verified: 52 tests pass (9 new), phone screenshots of terms + checkout. — 06:05
+[x] docs/BRAND_NAMES.md: 10 screened names (top: Skyprint, Born Beneath, Starwritten), brand voice, checks to run. — 06:10
+[x] docs/MARKETING_CONTENT.md: 10 video scripts, 2 Reddit posts, 10 Pinterest pins, 3 waitlist emails, DMs. — 06:15
+[x] LAUNCH_PLAN/DEPLOY/README point at showcase, content pack, legal steps. — 06:17
+[x] Review: code-review of tonight's work found 10 issues, all fixed (showcase download check, empty-teaser sentence,
+    EU-country detection, privacy placeholder, email kept on consent error, link tag kept on "Start again", retrograde
+    in check exit code, stale comment, orphan /policies page removed (now redirects to /terms), glyph-drift test).
+    Added showcase/make_reference.py. 60 tests pass; JS check passes; showcase republished (v2) with all 9 files. — 06:30
 
 ## PARKED
