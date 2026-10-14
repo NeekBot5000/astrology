@@ -1,0 +1,371 @@
+<title>Birth Sky Books</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: one night-sky column; the free chart tool sits right under the pitch, then real book pages, then the promise. Deliberately dark-only, like the book's cover. */
+:root {
+  --night: #1c2140;
+  --night-2: #262d58;
+  --panel: #232a52;
+  --gold: #e8d7a8;
+  --gold-soft: #cdbb8a;
+  --text: #ece6d6;
+  --muted: #b7b0c9;
+  --rule: rgba(232, 215, 168, 0.22);
+  --paper: #fbfaf7;
+  --ink: #2b2a33;
+  --rust: #e3a58f;
+  --display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: radial-gradient(1200px 700px at 80% -10%, var(--night-2), var(--night) 60%) fixed, var(--night);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+}
+.band { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 56px; }
+.band + .band { border-top: 1px solid var(--rule); }
+.inner { max-width: 1040px; margin: 0 auto; display: grid; gap: 28px; }
+.narrow { max-width: 720px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 500; color: var(--gold); line-height: 1.05; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(42px, 8vw, 72px); }
+h2 { font-size: clamp(32px, 5.5vw, 46px); }
+h3 { font-size: 24px; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font-size: 13px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-soft); }
+.lede { font-size: 19px; max-width: 34em; color: var(--text); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; color: var(--muted); }
+a { color: var(--gold); }
+button, .btn { font: 600 17px/1 var(--body); border: 0; border-radius: 999px; padding: 15px 26px; min-height: 48px; cursor: pointer; }
+.btn-gold { background: var(--gold); color: var(--night); }
+.btn-gold:hover { background: #f3e5bd; }
+.btn-ghost { background: transparent; color: var(--gold); border: 1px solid var(--rule); }
+.btn-ghost:hover { border-color: var(--gold); }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+/* Hero */
+.hero { grid-template-columns: 1fr; align-items: center; }
+.hero .cover { justify-self: center; width: min(300px, 70vw); transform: rotate(3deg); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5); border-radius: 3px; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+@media (min-width: 860px) { .hero { grid-template-columns: 1.3fr 1fr; } }
+
+/* Chart tool */
+.tool { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: clamp(18px, 4vw, 32px); display: grid; gap: 18px; }
+.fields { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .fields { grid-template-columns: 1fr 1fr; } .fields .wide { grid-column: 1 / -1; } }
+label { display: block; font-weight: 600; margin-bottom: 6px; }
+input[type=text], input[type=date], input[type=time] {
+  width: 100%; font: 17px var(--body); padding: 12px 14px; min-height: 48px; border-radius: 8px;
+  border: 1px solid #6f6a8c; background: #151a35; color: var(--text);
+}
+.check { display: flex; gap: 10px; align-items: center; font-weight: 400; margin: 10px 0 0; }
+.check input { width: 20px; height: 20px; accent-color: var(--gold); }
+.error { color: var(--rust); min-height: 1.2em; }
+.result { display: grid; gap: 28px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 900px) { .result { grid-template-columns: 1fr 1fr; } }
+.wheel { background: var(--paper); border-radius: 12px; padding: 10px; }
+.wheel svg { display: block; width: 100%; height: auto; }
+.big3 { display: grid; gap: 14px; }
+.trait { border-left: 2px solid var(--gold-soft); padding: 2px 0 2px 16px; }
+.trait .label { font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.trait h3 { margin: 2px 0 2px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--rule); }
+th { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.teaser { background: rgba(232, 215, 168, 0.08); border: 1px solid var(--rule); border-radius: 12px; padding: 18px 20px; display: grid; gap: 10px; }
+
+/* Book pages */
+.pages { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.pages figure { margin: 0; display: grid; gap: 8px; }
+.pages img { width: 100%; border-radius: 3px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45); background: #fff; }
+.pages figcaption { font-size: 14px; color: var(--muted); }
+.excerpt { background: var(--paper); color: var(--ink); border-radius: 12px; padding: clamp(20px, 5vw, 44px); display: grid; gap: 18px; }
+.excerpt h3 { color: var(--ink); font-size: 22px; }
+.excerpt .source { font-size: 13.5px; color: #6d6a78; margin-top: 6px; }
+.excerpt .source::before { content: "✦ "; color: #8a5a44; }
+.excerpt .chap { font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: #8a5a44; }
+.excerpt .title { font-family: var(--display); font-size: 36px; line-height: 1; }
+.excerpt .opening { font-family: var(--display); font-style: italic; font-size: 20px; color: #4b4856; border-bottom: 1px solid #e3ded2; padding-bottom: 16px; }
+
+/* Promise */
+.promises { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.promises div { border: 1px solid var(--rule); border-radius: 12px; padding: 18px; display: grid; gap: 6px; }
+.price { font-family: var(--display); font-size: 64px; color: var(--gold); line-height: 1; }
+footer.band { padding-block: 32px 48px; }
+footer p + p { margin-top: 8px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<header class="band">
+  <div class="inner hero">
+    <div style="display:grid; gap:20px">
+      <p class="eyebrow">Birth Sky Books</p>
+      <h1>A birth-chart book written for one person</h1>
+      <p class="lede">We calculate the real sky at the moment someone was born, then write a 22-page book about them where every paragraph names the part of their chart it comes from. A gift that feels personal, delivered as a PDF.</p>
+      <div class="actions">
+        <a class="btn btn-gold" href="#chart">Draw a chart free</a>
+        <button class="btn btn-ghost" type="button" id="dl-hero">Download a sample book</button>
+      </div>
+      <p class="small" id="dl-status-hero" role="status"></p>
+    </div>
+    <img class="cover" src="pages/page-1.png" alt="Cover of a sample book titled Maya's Birth Sky, with her chart wheel in gold on midnight blue">
+  </div>
+</header>
+
+<main>
+<section class="band" id="chart" aria-labelledby="chart-h">
+  <div class="inner">
+    <div style="display:grid; gap:10px">
+      <p class="eyebrow">Free chart</p>
+      <h2 id="chart-h">See the sky on the day they were born</h2>
+      <p class="muted">Everything is calculated here in your browser. Nothing you type is sent or saved.</p>
+    </div>
+    <form class="tool" id="chart-form" novalidate>
+      <div class="fields">
+        <div>
+          <label for="name">First name <span class="small">(optional)</span></label>
+          <input type="text" id="name" maxlength="40" autocomplete="off" value="Maya">
+        </div>
+        <div>
+          <label for="date">Birth date</label>
+          <input type="date" id="date" min="1900-01-01" required value="1994-05-17">
+        </div>
+        <div>
+          <label for="time">Birth time</label>
+          <input type="time" id="time" value="08:40">
+          <label class="check"><input type="checkbox" id="unknown"> I don't know the time</label>
+        </div>
+        <div>
+          <label for="city">Town or city of birth</label>
+          <input type="text" id="city" list="city-list" autocomplete="off" required value="Portland, Oregon, United States" aria-describedby="city-hint">
+          <datalist id="city-list"></datalist>
+          <p class="small" id="city-hint" style="margin-top:6px">Start typing and pick from the list. Smaller town? Choose the nearest big city.</p>
+        </div>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:14px; align-items:center">
+        <button class="btn-gold" type="submit">Draw the chart</button>
+        <p class="error" id="form-error" role="alert"></p>
+      </div>
+    </form>
+
+    <div class="result" id="result" aria-live="polite">
+      <div class="wheel" id="wheel"><p class="small" style="color:#6d6a78; padding:24px">Loading the sky…</p></div>
+      <div style="display:grid; gap:22px; min-width:0">
+        <h3 id="result-title" style="font-size:32px; font-weight:500">Maya's sky</h3>
+        <div class="big3" id="big3"></div>
+        <div class="table-wrap"><table id="positions" aria-label="Planet positions"></table></div>
+        <div class="teaser">
+          <p id="teaser-text">That's three of the twelve points in this chart. The book reads them all together, chapter by chapter: personality, mind, love, work, home, growth and direction.</p>
+          <p class="small">Free chart: planets and the angles between them, with the rising sign from the nearest large city. The book adds houses, exact birthplace coordinates and seven written chapters.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="book-h">
+  <div class="inner">
+    <div style="display:grid; gap:10px">
+      <p class="eyebrow">Inside the book</p>
+      <h2 id="book-h">Real pages from a sample book</h2>
+      <p class="muted">Maya is a made-up person born 17 May 1994 in Portland, Oregon. Her book shows what every book looks like.</p>
+    </div>
+    <div class="pages">
+      <figure><img src="pages/page-1.png" alt="Cover with Maya's chart wheel"><figcaption>Their chart wheel on the cover</figcaption></figure>
+      <figure><img src="pages/page-2.png" alt="Dedication page reading: For Maya, who always remembers everyone else's birthday"><figcaption>Your own words on the first page</figcaption></figure>
+      <figure><img src="pages/page-4.png" alt="Chart at a glance page with wheel and table of planet positions"><figcaption>The full chart and positions</figcaption></figure>
+      <figure><img src="pages/page-6.png" alt="First page of chapter one, Your Core Self"><figcaption>Seven written chapters</figcaption></figure>
+    </div>
+
+    <article class="excerpt" aria-label="Excerpt from chapter three">
+      <div class="chap">Chapter Three</div>
+      <div class="title">Love and Connection</div>
+      <p class="opening">You love the way you do everything important: carefully at first, then with your whole chest.</p>
+      <div>
+        <h3>Attracted to a good mind</h3>
+        <p>Venus, the planet of attraction, is in Gemini. What lights you up is conversation: someone who makes you laugh, sends you the article you were about to send them, and can argue playfully without getting nasty. Looks matter less than wit and curiosity. A date that turns into four hours of talking is your idea of chemistry. If the talk dries up, so does your interest, even if everything else looks right on paper.</p>
+        <p class="source">Venus in Gemini, 12th house</p>
+      </div>
+      <div>
+        <h3>Desire that knows how to move</h3>
+        <p>Venus forms a near-exact easy link with Mars in bold Aries. Attraction and action work together in you: once you do decide you like someone, you can be surprisingly direct, even the one who suggests the first date. Your Mars sits in the 11th house of friendships, so many of your best relationships begin as friendships, in group chats, shared hobbies or a friend's party.</p>
+        <p class="source">Venus sextile Mars · Mars in Aries, 11th house · Venus in Gemini, 12th house</p>
+      </div>
+      <p class="small" style="color:#6d6a78">The ✦ line under every section names the placements it's based on, so nothing is generic Sun-sign filler.</p>
+    </article>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="promise-h">
+  <div class="inner">
+    <p class="eyebrow">Coming this November</p>
+    <h2 id="promise-h">One book, one honest price</h2>
+    <div class="price">$29</div>
+    <div class="promises">
+      <div><h3>Pay once</h3><p class="muted">No subscription and no account. There's nothing to cancel.</p></div>
+      <div><h3>14-day refund</h3><p class="muted">If the book doesn't feel personal, you get your money back. No forms.</p></div>
+      <div><h3>Ready in minutes</h3><p class="muted">A 6×9 inch PDF to email, or to print like a paperback. Perfect for a last-minute gift.</p></div>
+      <div><h3>Private by design</h3><p class="muted">Birth details are used to make the book, then deleted.</p></div>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center">
+      <button class="btn btn-gold" type="button" id="dl-bottom">Download Maya's sample book (PDF)</button>
+      <p class="small" id="dl-status-bottom" role="status"></p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="band">
+  <div class="inner">
+    <p class="small">Books are for entertainment and self-reflection, not predictions or professional advice. Planet positions in the free chart come from Astronomy Engine; the books use the Swiss Ephemeris. City data: GeoNames (CC BY 4.0).</p>
+    <p class="small">Birth Sky Books is a working name.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+<script src="chart.js"></script>
+<script src="wheel.js"></script>
+<script>
+(function () {
+  "use strict";
+  var STYLE = {
+    Aries: "bold, quick to start and happiest with a challenge",
+    Taurus: "steady, sensual and loyal once committed",
+    Gemini: "curious, quick-witted and always making connections",
+    Cancer: "caring, protective and finely tuned to moods",
+    Leo: "warm, generous and made to be seen",
+    Virgo: "observant, practical and quietly devoted",
+    Libra: "fair-minded, sociable and drawn to harmony",
+    Scorpio: "intense, private and fiercely loyal",
+    Sagittarius: "adventurous, candid and always looking further",
+    Capricorn: "ambitious, patient and built for the long climb",
+    Aquarius: "independent, inventive and guided by ideals",
+    Pisces: "imaginative, empathetic and deeply intuitive"
+  };
+  var ROLE = {
+    Sun: "Sun: the core self",
+    Moon: "Moon: feelings and needs",
+    Ascendant: "Rising sign: the first impression"
+  };
+  var ASPECT_WORDS = { conjunction: "fused with", sextile: "working easily with", square: "in tension with", trine: "flowing with", opposition: "pulling against" };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var cities = null, index = {}, countries = {}, zones = [];
+
+  function label(c) {
+    return [c[0], c[1], countries[c[2]] || c[2]].filter(Boolean).join(", ");
+  }
+
+  fetch("cities.json").then(function (r) { return r.json(); }).then(function (data) {
+    countries = data.countries; zones = data.zones; cities = data.cities;
+    cities.forEach(function (c) { var k = label(c); if (!index[k]) index[k] = c; });
+    draw();
+  }).catch(function () { $("form-error").textContent = "The city list didn't load. Reload the page to try again."; });
+
+  var lastQuery = "";
+  $("city").addEventListener("input", function () {
+    var q = this.value.trim().toLowerCase();
+    if (!cities || q === lastQuery || q.length < 2) return;
+    lastQuery = q;
+    var hits = [];
+    for (var i = 0; i < cities.length && hits.length < 12; i++) {  // already sorted by population, biggest first
+      if (cities[i][0].toLowerCase().indexOf(q) === 0) hits.push(label(cities[i]));
+    }
+    var list = $("city-list");
+    list.textContent = "";
+    hits.forEach(function (h) { var o = document.createElement("option"); o.value = h; list.appendChild(o); });
+  });
+
+  $("unknown").addEventListener("change", function () { $("time").disabled = this.checked; });
+
+  function deg(p) { var d = Math.floor(p.degree); var m = Math.floor((p.degree - d) * 60); return d + "°" + String(m).padStart(2, "0") + "′"; }
+
+  function draw() {
+    var err = $("form-error");
+    err.textContent = "";
+    if (!window.Astronomy) { err.textContent = "The astronomy library didn't load. Reload the page to try again."; return; }
+    var city = index[$("city").value.trim()];
+    var dateVal = $("date").value;
+    var unknown = $("unknown").checked;
+    var timeVal = unknown ? "12:00" : $("time").value;
+    if (!dateVal || dateVal < "1900-01-01") { err.textContent = "Enter a birth date from 1900 onwards."; return; }
+    if (!timeVal) { err.textContent = "Enter the birth time, or tick “I don't know the time”."; return; }
+    if (!city) { err.textContent = "Pick the town or city from the list as you type."; return; }
+    var d = dateVal.split("-").map(Number), t = timeVal.split(":").map(Number);
+    var utc = BirthChart.zonedToUtc(d[0], d[1], d[2], t[0], t[1], zones[city[5]]);
+    if (!utc) { err.textContent = "Clocks jumped forward for daylight saving at that exact time there, so it never happened. Check the time on the birth certificate."; return; }
+
+    var chart = BirthChart.compute(utc, city[3], city[4], !unknown);
+    var name = $("name").value.trim().slice(0, 40);
+    $("result-title").textContent = name ? name + "'s sky" : "The sky that day";
+    $("wheel").innerHTML = ChartWheel.render(chart, (name ? name + "'s" : "Birth") + " chart wheel");
+
+    var big = [chart.planets[0], chart.planets[1]];
+    if (chart.ascendant) big.push(chart.ascendant);
+    var box = $("big3");
+    box.textContent = "";
+    big.forEach(function (p) {
+      var div = document.createElement("div"); div.className = "trait";
+      var l = document.createElement("div"); l.className = "label"; l.textContent = ROLE[p.body];
+      var h = document.createElement("h3"); h.textContent = p.sign;
+      var s = document.createElement("p"); s.textContent = STYLE[p.sign].charAt(0).toUpperCase() + STYLE[p.sign].slice(1) + ".";
+      div.append(l, h, s); box.appendChild(div);
+    });
+
+    var rows = (chart.ascendant ? [chart.ascendant, chart.midheaven] : []).concat(chart.planets);
+    var table = $("positions");
+    table.textContent = "";
+    var head = table.createTHead().insertRow();
+    ["Point", "Sign", "Degree"].forEach(function (x) { var th = document.createElement("th"); th.scope = "col"; th.textContent = x; head.appendChild(th); });
+    var body = table.createTBody();
+    rows.forEach(function (p) {
+      var r = body.insertRow();
+      r.insertCell().textContent = p.body;
+      r.insertCell().textContent = p.sign;
+      r.insertCell().textContent = deg(p) + (p.retrograde ? " ℞" : "");
+    });
+
+    var points = rows.length;
+    // Angles between two slow outer planets are shared by everyone born that year, so leave them out of the summary.
+    var OUTER = { Uranus: 1, Neptune: 1, Pluto: 1 };
+    var personal = chart.aspects.filter(function (a) { return !(OUTER[a.body1] && OUTER[a.body2]); });
+    var top = personal.slice(0, 2).map(function (a) { return a.body1 + " " + ASPECT_WORDS[a.kind] + " " + a.body2; });
+    $("teaser-text").textContent = "That's " + (big.length === 3 ? "three" : "two") + " of the " + points + " points in this chart, and there are " +
+      personal.length + " personal angles between planets, the closest being " + top.join(" and ") +
+      ". The book reads them all together, chapter by chapter: personality, mind, love, work, home, growth and direction.";
+  }
+
+  $("chart-form").addEventListener("submit", function (e) { e.preventDefault(); draw(); });
+
+  // Sample book download (the viewer confirms the save).
+  var downloads = null;
+  async function saveSample(statusId) {
+    var status = $(statusId);
+    if (!downloads) { status.textContent = "Downloads aren't available in this view."; return; }
+    status.textContent = "Preparing the PDF…";
+    try {
+      var blob = await (await fetch("maya-sample.pdf")).blob();
+      await downloads.save({ filename: "birth-sky-sample-book.pdf", data: blob });
+      status.textContent = "Saved.";
+    } catch (e) {
+      status.textContent = e && e.code === "declined" ? "" : "The download didn't start. Try again in a moment.";
+    }
+  }
+  ["hero", "bottom"].forEach(function (k) {
+    $("dl-" + k).addEventListener("click", function () { saveSample("dl-status-" + k); });
+  });
+  if (window.claude && window.claude.use) {
+    window.claude.use("downloads").then(function (d) {
+      downloads = d;
+      if (!d) ["hero", "bottom"].forEach(function (k) { $("dl-" + k).hidden = true; });
+    });
+  }
+})();
+</script>
