@@ -2,7 +2,7 @@
 
 > **Start here (added 14 Oct):** before the shop is online you can already share the **showcase page**, a private claude.ai page with a free chart-wheel tool, real sample pages and a sample download: https://claude.ai/artifact/VLYVz9jLuJ4ExR9CWAAE6V. Open its Share menu to choose who can see it. Use it for the "friends" step and early feedback. It can't take orders or sign-ups; that needs the real site (`docs/DEPLOY.md`). Ready-to-post copy is in `docs/MARKETING_CONTENT.md`.
 
-**Goal:** find out, cheaply and fast, whether strangers will pay $9 for a personalized birth-chart book.
+**Goal:** find out, cheaply and fast, whether strangers will pay $8 for a personalized birth-chart book.
 **Kill rule:** after ~1,000 targeted visitors, fewer than 5 paid orders means stop or change the angle (see `FORECAST.md`).
 **Budget:** close to $0 in ads. The cost is your time: about 5-7 hours a week for 7 weeks.
 **Window:** 2 Nov to 24 Dec 2026. Christmas helps us: a PDF gift that arrives within minutes is the perfect last-minute present.
@@ -19,7 +19,7 @@ Every number below can be read from the site's stats page (`/admin/stats`, passw
 
 **Where they spend time:** TikTok and Instagram Reels (astrology content is huge there), Pinterest (gift ideas, "aesthetic" astrology), Reddit (gift and astrology communities, which are very strict about promotion), group chats (word of mouth).
 
-**What stops them buying:** "Is this just ChatGPT?", "Will I get trapped in a subscription?", "Is it worth $9 when apps are free?"
+**What stops them buying:** "Is this just ChatGPT?", "Will I get trapped in a subscription?", "Is it worth $8 when apps are free?"
 
 ## 2. What we say
 
@@ -76,7 +76,7 @@ Leave about 1 in 5 slots open for reacting to whatever gets comments.
 **Video #1, "the receipts":** (screen recording of the sample book)
 > Hook: "Every astrology app told me the same thing. This one shows its receipts."
 > Scroll a page slowly, zoom on the ✦ line: "Venus in Gemini, 12th house. Every paragraph says which part of your chart it's based on."
-> End: "Free chart preview, link in bio. $9 once, no subscription."
+> End: "Free chart preview, link in bio. $8 once, no subscription."
 
 **Video #2, "gift idea":**
 > Hook: "Gift idea for the friend who's obsessed with her rising sign."
@@ -134,7 +134,7 @@ Check the stats page every Sunday and write 3 lines in `PROGRESS.md`: numbers, w
 ## 9. Next steps (owner)
 
 1. Pick the brand name and check the domain and social handles are free.
-2. Decide the launch price ($9 suggested, or test $19).
+2. Decide the launch price ($8 suggested, or test $19).
 3. Create Stripe and Anthropic accounts; I'll walk through connecting them.
 4. Pick hosting (see `docs/DEPLOY.md`).
 5. Record the first 6 videos.

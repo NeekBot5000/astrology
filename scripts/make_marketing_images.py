@@ -62,7 +62,7 @@ DESIGNS = {
         <img class="page" src="{p3}" style="position:absolute;width:430px;left:360px;top:70px;transform:rotate(5deg)">
         <img class="page" src="{p1}" style="position:absolute;width:430px;left:90px;top:20px;transform:rotate(-4deg)">
       </div>
-      <div class="foot"><b>Free chart preview</b> · $9 once · instant PDF</div>
+      <div class="foot"><b>Free chart preview</b> · $8 once · instant PDF</div>
     """),
     "pin-gift-idea": (1000, 1500, """
       <div class="brand">Gift idea</div>
@@ -81,7 +81,7 @@ DESIGNS = {
         <img src="{p11}" style="width:1020px;margin:-50px 0 0 -105px">
       </div>
       <p style="font-size:30px;line-height:1.4;margin-top:34px"><span class="star">✦</span> Under every paragraph: the exact placement it's based on. No generic Sun-sign filler.</p>
-      <div class="foot" style="margin-top:24px">$9 once · no subscription · free preview</div>
+      <div class="foot" style="margin-top:24px">$8 once · no subscription · free preview</div>
     """),
     # Link preview card for chats and social sites (Open Graph): 1200 x 630
     "og-card": (1200, 630, """
@@ -90,7 +90,7 @@ DESIGNS = {
         <div>
           <div class="brand">{brand}</div>
           <h1 style="font-size:74px;margin:20px 0 20px">A birth-chart book written for one person</h1>
-          <p style="font-size:28px;line-height:1.4">Free chart preview · $9 once · instant PDF</p>
+          <p style="font-size:28px;line-height:1.4">Free chart preview · $8 once · instant PDF</p>
         </div>
       </div>
     """),
@@ -99,7 +99,7 @@ DESIGNS = {
       <div class="brand">{brand}</div>
       <h1 style="font-size:104px;margin:40px 0 30px">Pay once.<br>Seriously.</h1>
       <p style="font-size:36px;line-height:1.45;max-width:860px">One personalized birth-chart book. No subscription, no account, no surprise charges. Full refund within 14 days if it doesn't feel personal.</p>
-      <div class="foot"><b>$9</b> · free chart preview first</div>
+      <div class="foot"><b>$8</b> · free chart preview first</div>
     """),
     "ig-sample-page": (1080, 1080, """
       <div style="display:flex;gap:56px;height:100%;align-items:center">

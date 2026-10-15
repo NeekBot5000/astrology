@@ -81,7 +81,7 @@ def test_landing_page_shows_sample_and_price(tmp_path, monkeypatch):
     r = client.get("/")
     assert r.status_code == 200
     assert "Love and Connection" in r.text and "Venus in Gemini, 12th house" in r.text
-    assert "$9" in r.text
+    assert "$8" in r.text
     assert r.headers["x-frame-options"] == "DENY"
 
 
@@ -124,7 +124,7 @@ def test_paid_flow_writes_book(tmp_path, monkeypatch):
     r = client.post(f"/p/{order_id}/checkout", data={"email": "sam@example.com", **AGREE}, follow_redirects=False)
     assert r.status_code == 303 and r.headers["location"].startswith("https://checkout.stripe.test/")
     params = stripe.created[0]
-    assert params["line_items"][0]["price_data"]["unit_amount"] == 900
+    assert params["line_items"][0]["price_data"]["unit_amount"] == 800
     assert params["metadata"]["order_id"] == order_id
 
     # Returning from Stripe triggers writing (the webhook might be slower).
@@ -466,5 +466,5 @@ def test_search_engine_files_and_product_data(tmp_path, monkeypatch):
     assert "<loc>http://localhost:8000/terms</loc>" in client.get("/sitemap.xml").text
     page = client.get("/").text
     data = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', page, re.S).group(1))
-    assert data["offers"]["price"] == "9.00" and data["offers"]["priceCurrency"] == "USD"
+    assert data["offers"]["price"] == "8.00" and data["offers"]["priceCurrency"] == "USD"
     assert data["offers"]["availability"].endswith("PreOrder")

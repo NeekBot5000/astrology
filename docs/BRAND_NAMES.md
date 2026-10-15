@@ -32,7 +32,7 @@ The brand sounds like a well-read friend who happens to know astrology: warm, sp
 
 | Do | Don't |
 |---|---|
-| Name the real thing: "your Moon in Leo, 2nd house", "one payment of $9". | Use vague mysticism: "the universe is guiding you", "cosmic energy". |
+| Name the real thing: "your Moon in Leo, 2nd house", "one payment of $8". | Use vague mysticism: "the universe is guiding you", "cosmic energy". |
 | Say it plainly and kindly, including the tensions in a chart. | Flatter everyone or promise outcomes: no predictions about love, money or health. |
 | Be honest about how it works (calculated sky, written by AI, checked automatically). | Use urgency tricks or hype: "only 3 left!", "limited time", fake countdowns. |
 
