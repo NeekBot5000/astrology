@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ order.name }}'s chart · {{ brand }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div class="wrap">
+    <h1>{{ order.name }}'s sky</h1>
+    <p>{{ birth_date_text }}{% if order.birth_time %} at {{ birth_time_text }}{% else %}, time unknown{% endif %} · {{ order.place_name }}</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="preview-grid">
+    <div class="wheel-card">{{ wheel | safe }}</div>
+    <div>
+      <h2 class="eyebrow">Free preview</h2>
+      {% for t in teasers %}
+      <div class="teaser">
+        <div class="label">{{ t.label }}</div>
+        <h3>{{ t.sign }}</h3>
+        <p>{{ t.text }}</p>
+      </div>
+      {% endfor %}
+      {% if not chart.time_known %}
+      <p class="small">Without a birth time there's no rising sign or houses. The book will still cover every planet and the angles between them.</p>
+      {% endif %}
+      <p>That's {{ ['', 'one', 'two', 'three'][teasers | length] }} of the {{ chart.placements | length + (2 if chart.time_known else 0) }} points in this chart. The full book reads them all together, chapter by chapter{% if focus_text %}, with extra depth on {{ focus_text }}{% endif %}.</p>
+      <p class="small">Wrong place or time? <a href="/{% if order.source %}?src={{ order.source | urlencode }}{% endif %}#start">Start again</a>. The place we found is: {{ order.place_name }}.</p>
+
+      <form class="buy-box" method="post" action="/p/{{ order.id }}/checkout">
+        {% if error %}<div class="errors" role="alert">{{ error }}</div>{% endif %}
+        {% if payments %}
+        <h3>Get the full book: {{ price }}</h3>
+        <p class="small">22 pages, delivered as a PDF a few minutes after payment. One-time payment, 14-day refund.</p>
+        <div class="field">
+          <label for="email">Email for the receipt and download link <span class="small">(optional)</span></label>
+          <input type="email" id="email" name="email" autocomplete="email" value="{{ email }}">
+        </div>
+        <label class="check consent"><input type="checkbox" name="agree" value="true" required>
+          <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms of service</a> and ask you to make the book straight away. I understand that my legal right of withdrawal ends once the book is available to download. (Your <a href="/refunds" target="_blank" rel="noopener">14-day refund promise</a> still applies.)</span></label>
+        <button class="btn btn-dark" type="submit">Continue to secure payment</button>
+        <p class="small">Payment is handled by Stripe. We never see your card details. {{ price }} is the full price, charged once.</p>
+        {% else %}
+        <h3>Reserve the full book</h3>
+        <p class="small">We're putting the finishing touches on the book. Reserve a copy now and we'll email you as soon as it's ready, with launch pricing of {{ price }}. Nothing to pay today.</p>
+        <div class="field">
+          <label for="email">Your email</label>
+          <input type="email" id="email" name="email" autocomplete="email" required value="{{ email }}">
+        </div>
+        <button class="btn btn-dark" type="submit">Reserve my copy</button>
+        <p class="small">We'll use your email only to tell you when ordering opens, and delete the reservation after 120 days. See our <a href="/privacy">privacy policy</a>.</p>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

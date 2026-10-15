@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Stats · {{ brand }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block main %}
+<div class="page-head"><div class="wrap"><h1>Pre-sale numbers</h1><p>{% if since %}Since {{ since }}{% else %}All time{% endif %}</p></div></div>
+<div class="wrap narrow" style="padding: 32px 16px 48px">
+  <table class="stats">
+    <tr><th scope="row">Free previews started</th><td>{{ previews }}</td></tr>
+    <tr><th scope="row">Reserved a copy (email, no payment)</th><td>{{ reached.preorder }}</td></tr>
+    <tr><th scope="row">Paid</th><td>{{ reached.paid }}</td></tr>
+    <tr><th scope="row">Preview → paid or reserved</th><td>{% if previews %}{{ "%.1f" | format(100 * (reached.paid + reached.preorder) / previews) }}%{% else %}–{% endif %}</td></tr>
+    <tr><th scope="row">Average AI cost per book</th><td>{% if avg_cost is not none %}${{ "%.2f" | format(avg_cost) }}{% else %}–{% endif %}</td></tr>
+  </table>
+  <p><a href="/admin/review">Books waiting for your review</a> · <a href="/admin/preorders.csv">Download reserved-copy emails (CSV)</a>. Each row has a private link back to that person's preview, ready for when payments are switched on.</p>
+  <h2>By link tag</h2>
+  <div style="overflow-x: auto">
+  <table class="stats funnel">
+    <thead><tr><th scope="col">Tag</th><th scope="col">Visitors</th><th scope="col">Previews</th><th scope="col">Reserved</th><th scope="col">Paid</th></tr></thead>
+    <tbody>
+    {% for r in funnel %}
+      <tr><th scope="row">{{ r.source }}</th><td>{{ r.visits }}</td><td>{{ r.previews }}</td><td>{{ r.preorders }}</td><td>{{ r.paid }}</td></tr>
+    {% else %}
+      <tr><td colspan="5">No visits yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="small">Share links like <code>/?src=tiktok</code> or <code>/?src=reddit</code>. Visitors are counted once per landing-page view, without third-party trackers.</p>
+  {% if failed %}
+  <h2>Failed books ({{ failed | length }})</h2>
+  <p class="small">These customers paid but their book couldn't be made. Retry from the review page, or refund them in Stripe.</p>
+  <ul>{% for o in failed %}<li>{{ o.created_at[:10] }} · {{ o.name }} · {{ o.email or "no email" }} · <code>{{ (o.error or "")[:120] }}</code>
+    <form method="post" action="/admin/review/{{ o.id }}/rewrite" style="display:inline"><button class="linkish" type="submit">retry</button></form></li>{% endfor %}</ul>
+  {% endif %}
+  <p class="small">Raw counts by status: {% for k, v in counts.items() %}{{ k }} {{ v }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+  <p class="small">Kill rule from docs/FORECAST.md: after about 1,000 targeted visitors, fewer than 5 paid orders means stop or change the angle. Previews count only visitors who filled in the form, so they are fewer than total visitors.</p>
+</div>
+{% endblock %}

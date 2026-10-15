@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Your book · {{ brand }}{% endblock %}
+{% block head %}
+<meta name="robots" content="noindex">
+{% if order.status in ("awaiting_payment", "paid", "writing") %}<meta http-equiv="refresh" content="8">{% endif %}
+{% endblock %}
+{% block main %}
+<div class="page-head">
+  <div class="wrap"><h1>{{ order.name }}'s book</h1></div>
+</div>
+<div class="wrap narrow">
+  <div class="status-card" role="status" aria-live="polite">
+  {% if order.status == "preorder" %}
+    <h2>You're on the list</h2>
+    {% if payments %}
+    <p>Good news: ordering is open. <a class="btn btn-dark" href="/p/{{ order.id }}">Get {{ order.name }}'s book</a></p>
+    {% else %}
+    <p>We've reserved {{ order.name }}'s book and will email {{ order.email }} as soon as it's ready to order. There's nothing to pay until then, and you can change your mind any time.</p>
+    {% endif %}
+    <form method="post" action="/order/{{ order.id }}/delete">
+      <p class="small">Changed your mind? <button class="linkish" type="submit">Cancel the reservation and erase the details</button>.</p>
+    </form>
+  {% elif order.status == "awaiting_payment" %}
+    <p><span class="spinner" aria-hidden="true"></span>Waiting for the payment to be confirmed. This page refreshes on its own.</p>
+    <p class="small">Closed the payment page by accident? <a href="/p/{{ order.id }}">Go back to the preview</a>.</p>
+  {% elif order.status == "review" %}
+    <h2>Almost there</h2>
+    <p>{{ order.name }}'s book is written and is getting a final read-through by a person before it's released. That usually happens within a few hours; this page will have the download button as soon as it's done.</p>
+    <p class="small">Your payment receipt from Stripe includes a link back to this page.</p>
+  {% elif order.status in ("paid", "writing") %}
+    <h2>Writing the book</h2>
+    <p><span class="spinner" aria-hidden="true"></span>Payment received, thank you. Seven chapters are being written from {{ order.name }}'s chart. This usually takes a few minutes and the page refreshes on its own.</p>
+    <p class="small">You can safely close this page. Your payment receipt from Stripe includes a link back here.</p>
+  {% elif order.status == "ready" %}
+    <h2>It's ready</h2>
+    <p>{{ order.name }}'s book is finished.</p>
+    <p><a class="btn btn-dark" href="/order/{{ order.id }}/book.pdf">Download the PDF</a></p>
+    <p class="small">This link works for {{ keep_days }} days. After that the book and the birth details are erased automatically, so save the PDF somewhere safe.</p>
+    <form method="post" action="/order/{{ order.id }}/delete">
+      <p class="small">Already saved it? <button class="linkish" type="submit">Erase the book and birth details now</button>.</p>
+    </form>
+  {% elif order.status == "failed" %}
+    <h2>Something went wrong</h2>
+    <p>We're sorry: the book couldn't be finished. You won't be left paying for nothing. Email <a href="mailto:{{ support_email }}?subject=Order%20{{ order.id }}">{{ support_email }}</a> with this page's link and we'll fix it or refund you in full.</p>
+  {% else %}
+    <p>This order isn't paid yet. <a href="/p/{{ order.id }}">Back to the preview</a>.</p>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

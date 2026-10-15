@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ brand }}: a birth-chart book written for one person{% endblock %}</title>
+<meta name="description" content="A personalized birth-chart reading, calculated from the real sky at the moment of birth and delivered as a beautiful PDF book. A one-time gift, no subscription.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ brand }}: a birth-chart book written for one person">
+<meta property="og:description" content="Calculated from the real sky at the moment of birth. Free chart preview, {{ price }} once, instant PDF.">
+<meta property="og:image" content="{{ base_url }}/static/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/site.css">
+{% block head %}{% endblock %}
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="/">{{ brand }}</a>
+    <nav aria-label="Main">
+      <a href="/#sample">Sample</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/#start">Start</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Our books are for entertainment and self-reflection. They are not a substitute for medical, legal, financial or psychological advice.</p>
+    <p><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/refunds">Refunds and withdrawal</a> · <a href="/legal-notice">Legal notice</a> · <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+  </div>
+</footer>
+</body>
+</html>

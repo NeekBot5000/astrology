@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ legal_title }} · {{ brand }}{% endblock %}
+{% block main %}
+<div class="page-head"><div class="wrap"><h1>{{ legal_title }}</h1>
+<p>{% if legal.effective %}In effect from {{ legal.effective }}.{% else %}Draft, not yet in effect.{% endif %}</p></div></div>
+<div class="wrap narrow legal">
+  {% if not legal.ready %}
+  <div class="draft-banner" role="note">
+    <strong>Draft.</strong> The business details on this page are placeholders in [square brackets]. They must be filled in, and these pages reviewed by a lawyer, before the shop takes real orders.
+  </div>
+  {% endif %}
+  <nav class="legal-nav" aria-label="Legal pages">
+    <a href="/terms"{% if active == "terms" %} aria-current="page"{% endif %}>Terms of service</a>
+    <a href="/privacy"{% if active == "privacy" %} aria-current="page"{% endif %}>Privacy</a>
+    <a href="/refunds"{% if active == "refunds" %} aria-current="page"{% endif %}>Refunds and withdrawal</a>
+    <a href="/legal-notice"{% if active == "notice" %} aria-current="page"{% endif %}>Legal notice</a>
+  </nav>
+  {% block legal %}{% endblock %}
+  <p class="small legal-foot">Questions about these terms or your data: <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
+</div>
+{% endblock %}

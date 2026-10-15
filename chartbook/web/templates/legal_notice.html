@@ -1,0 +1,15 @@
+{% extends "legal_base.html" %}
+{% block legal %}
+<p>Information about the provider of this website, as required by law in some countries (for example, § 5 DDG in Germany, where it is known as the "Impressum").</p>
+<h2>Provider</h2>
+<p>{{ legal.name }}<br>{{ legal.address_html | safe }}</p>
+<h2>Contact</h2>
+<p>Email: {{ support_email }}<br>[Phone number, if your country requires one, or another fast way to reach you]</p>
+{% if legal.vat_id %}<h2>VAT ID</h2><p>{{ legal.vat_id }}</p>{% else %}<h2>VAT ID</h2><p>[VAT identification number, if you have one]</p>{% endif %}
+<h2>Responsible for content</h2>
+<p>{{ legal.name }}, address as above.</p>
+<h2>Consumer dispute resolution</h2>
+<p>{% if legal.eu %}We are not obliged, and not willing, to take part in dispute resolution proceedings before a consumer arbitration board. {% endif %}Please contact us directly; we'll do our best to resolve any issue.</p>
+<h2>Credits</h2>
+<p>Planet positions: Swiss Ephemeris by Astrodienst AG. Place search: © OpenStreetMap contributors (Nominatim). Time zones: timezonefinder. Fonts: Cormorant Garamond and Source Serif 4 (SIL Open Font License). Book text written with an AI model from Anthropic.</p>
+{% endblock %}

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ title }}</title>
+<style>
+{{ fonts_css | safe }}
+
+:root {
+  --night: #1c2140;
+  --gold: #e8d7a8;
+  --ink: #2b2a33;
+  --muted: #7d7a88;
+  --rule: #d9d4c7;
+  --paper: #ffffff;
+  --accent: #8a5a44;
+}
+
+@page {
+  size: 6in 9in;
+  margin: 0.75in 0.7in 0.8in;
+  @bottom-center {
+    content: counter(page);
+    font-family: "Source Serif 4", serif;
+    font-size: 8.5pt;
+    color: #9a96a3;
+  }
+}
+@page cover { margin: 0; @bottom-center { content: none; } }
+@page plain { @bottom-center { content: none; } }
+
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 10.5pt;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--paper);
+  hyphens: auto;
+  font-variant-numeric: oldstyle-nums;
+}
+h1, h2, h3, .display { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; }
+
+/* Cover */
+.cover {
+  page: cover;
+  width: 6in; height: 9in;
+  background: radial-gradient(circle at 50% 38%, #2a3160 0%, var(--night) 62%);
+  color: var(--gold);
+  text-align: center;
+  display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+  padding: 0.85in 0.6in 0.7in;
+  break-after: page;
+}
+.cover .brand { font-size: 8pt; letter-spacing: 0.32em; text-transform: uppercase; opacity: 0.8; }
+.cover .wheel svg { width: 3.6in; height: 3.6in; opacity: 0.92; }
+.cover h1 { font-size: 34pt; line-height: 1.05; margin: 0 0 0.12in; font-weight: 500; }
+.cover .sub { font-size: 10pt; font-style: italic; opacity: 0.9; line-height: 1.5; }
+
+/* Simple pages */
+.plain { page: plain; break-after: page; }
+.dedication { display: flex; align-items: center; justify-content: center; min-height: 7.2in; text-align: center; }
+.dedication p { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 16pt; line-height: 1.45; max-width: 3.8in; }
+
+.contents h2, .glance h2, .howto h2, .closing h2 { font-size: 22pt; margin: 0 0 0.25in; font-weight: 500; }
+.contents ol { list-style: none; padding: 0; margin: 0; }
+.contents li { display: flex; gap: 0.12in; padding: 0.07in 0; border-bottom: 1px solid var(--rule); }
+.contents li span:first-child { color: var(--muted); width: 0.9in; font-size: 9pt; padding-top: 2px; }
+
+/* Chart at a glance */
+.glance { break-after: page; }
+.glance h2 { margin-bottom: 0.08in; }
+.glance .wheel svg { width: 3.2in; height: 3.2in; display: block; margin: 0 auto 0.04in; }
+.glance .meta { text-align: center; color: var(--muted); font-size: 8.5pt; margin-bottom: 0.08in; }
+table.positions { width: 100%; border-collapse: collapse; font-size: 8.5pt; font-variant-numeric: lining-nums tabular-nums; }
+table.positions th { text-align: left; font-weight: 600; color: var(--muted); font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--rule); padding: 3px 4px; }
+table.positions td { padding: 1.5px 4px; border-bottom: 1px solid #ece8de; }
+.note { font-size: 8.5pt; color: var(--muted); font-style: italic; margin-top: 0.12in; }
+
+.howto { break-after: page; }
+.howto p { margin: 0 0 0.12in; }
+.howto dl { margin: 0.15in 0 0; font-size: 9.5pt; }
+.howto dt { font-weight: 600; }
+.howto dd { margin: 0 0 0.08in; }
+
+/* Chapters */
+.chapter { break-before: page; }
+.chapter .number { font-size: 8pt; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-top: 0.6in; }
+.chapter h2 { font-size: 28pt; line-height: 1.05; margin: 0.06in 0 0.16in; font-weight: 500; }
+.chapter .opening { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 14pt; line-height: 1.35; color: #4b4856; margin: 0 0 0.3in; padding-bottom: 0.22in; border-bottom: 1px solid var(--rule); }
+.para { margin: 0 0 0.2in; break-inside: avoid-page; }
+.para h3 { font-size: 13.5pt; margin: 0 0 0.03in; font-weight: 600; line-height: 1.2; }
+.para p { margin: 0; }
+.para .source { font-size: 7.5pt; color: var(--muted); letter-spacing: 0.02em; margin-top: 0.05in; font-variant-numeric: lining-nums; }
+.para .source::before { content: "✦ "; color: var(--accent); }
+
+/* Closing */
+.closing { break-before: page; }
+.closing p { margin: 0 0 0.12in; }
+.colophon { margin-top: 0.4in; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 0.12in; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="brand">{{ brand }}</div>
+  <div class="wheel" aria-hidden="true">{{ cover_wheel | safe }}</div>
+  <div>
+    <h1>{{ title }}</h1>
+    <div class="sub">The sky on {{ birth_date }}{% if time_known %}, {{ birth_time }}{% endif %}<br>{{ birth_place }}</div>
+  </div>
+</section>
+
+{% if dedication %}
+<section class="plain dedication"><p>{{ dedication }}</p></section>
+{% endif %}
+
+<section class="plain contents">
+  <h2>Contents</h2>
+  <ol>
+    <li><span>Overview</span><span>Your chart at a glance</span></li>
+    <li><span>Guide</span><span>How to read this book</span></li>
+    {% for ch in chapters %}
+    <li><span>Chapter {{ ch.number }}</span><span>{{ ch.title }}</span></li>
+    {% endfor %}
+    <li><span>Afterword</span><span>A note before you go</span></li>
+  </ol>
+</section>
+
+<section class="glance">
+  <h2>Your chart at a glance</h2>
+  <div class="wheel">{{ wheel | safe }}</div>
+  <div class="meta">{{ birth_date }} · {{ birth_time }} · {{ birth_place }}</div>
+  <table class="positions">
+    <thead><tr><th>Point</th><th>Sign</th><th>Degree</th>{% if time_known %}<th>House</th>{% endif %}</tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td>{{ r.body }}</td><td>{{ r.sign }}</td>
+        <td>{{ r.degree }}{% if r.retrograde %} <span title="retrograde">℞</span>{% endif %}</td>
+        {% if time_known %}<td>{% if r.house %}{{ r.house | ordinal }}{% endif %}</td>{% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% for n in notes %}<p class="note">{{ n }}</p>{% endfor %}
+</section>
+
+<section class="howto">
+  <h2>How to read this book</h2>
+  <p>This book was written from one thing only: the position of the Sun, Moon and planets at the moment you were born, seen from {{ birth_place }}. Every section ends with a small line, marked ✦, naming the placements it is based on, so you can always see why something was said about you.</p>
+  <p>Astrology is best used as a mirror, not a forecast. Some passages will feel uncannily familiar and others less so. Keep what rings true, question what doesn't, and notice which parts you find yourself thinking about later.</p>
+  <dl>
+    <dt>Signs</dt><dd>The twelve sections of the zodiac. A planet's sign describes the style in which that part of you operates.</dd>
+    {% if time_known %}<dt>Houses</dt><dd>Twelve areas of life, from self-image (1st) to the inner life (12th). A planet's house shows where its energy shows up most.</dd>
+    <dt>Rising sign</dt><dd>The sign that was coming up on the eastern horizon when you were born. It colors first impressions and how you meet the world.</dd>{% endif %}
+    <dt>Aspects</dt><dd>Angles between planets. Trines and sextiles flow easily; squares and oppositions create tension that pushes you to grow; conjunctions fuse two planets together.</dd>
+    <dt>Retrograde (℞)</dt><dd>A planet that appeared to move backwards from Earth when you were born, often read as energy that turns inward first.</dd>
+  </dl>
+</section>
+
+{% for ch in chapters %}
+<section class="chapter">
+  <div class="number">Chapter {{ ch.number }}</div>
+  <h2>{{ ch.title }}</h2>
+  <p class="opening">{{ ch.opening }}</p>
+  {% for p in ch.paragraphs %}
+  <div class="para">
+    {% if p.heading %}<h3>{{ p.heading }}</h3>{% endif %}
+    <p>{{ p.text }}</p>
+    {% if p.sources %}<div class="source">{{ p.sources | join(" · ") }}</div>{% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endfor %}
+
+<section class="closing">
+  <h2>A note before you go</h2>
+  <p>A birth chart is a snapshot of a single moment, and you have been changing ever since. The patterns described here are tendencies, not instructions. You get to decide what to do with them.</p>
+  <p>If you come back to this book in a year, different chapters may stand out. That is part of the point.</p>
+  <div class="colophon">
+    Made for {{ name }} on {{ created }} by {{ brand }}. Planet positions calculated with the Swiss Ephemeris. Written for entertainment and self-reflection; it is not a substitute for professional advice of any kind. Text written by AI from the calculated chart. For personal use and gifting; please do not resell.
+  </div>
+</section>
+
+</body>
+</html>

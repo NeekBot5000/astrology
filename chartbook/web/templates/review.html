@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Review · {{ brand }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block main %}
+<div class="page-head"><div class="wrap"><h1>Books waiting for review</h1>
+<p>{% if review_on %}Review is on: customers can download a book only after you approve it.{% else %}Review is off (set REVIEW_BOOKS=true to turn it on). Books go straight to customers.{% endif %}</p></div></div>
+<div class="wrap narrow" style="padding: 32px 16px 48px">
+  {% for o in orders %}
+  <div class="status-card">
+    <h3>{{ o.name }}</h3>
+    <p class="small">Paid {{ (o.paid_at or o.created_at)[:16] | replace("T", " ") }} · {{ o.place_name }} · AI cost {% if o.cost_cents is not none %}${{ "%.2f" | format(o.cost_cents / 100) }}{% else %}–{% endif %}</p>
+    <p><a href="/admin/review/{{ o.id }}.pdf" target="_blank" rel="noopener">Open the PDF</a></p>
+    <form method="post" action="/admin/review/{{ o.id }}/approve" style="display:inline"><button class="btn btn-dark" type="submit">Approve and release</button></form>
+    <form method="post" action="/admin/review/{{ o.id }}/rewrite" style="display:inline; margin-left: 12px"><button class="linkish" type="submit">Rewrite it</button></form>
+  </div>
+  {% else %}
+  <p>Nothing waiting. <a href="/admin/stats">Back to stats</a></p>
+  {% endfor %}
+</div>
+{% endblock %}

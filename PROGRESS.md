@@ -2,7 +2,78 @@
 
 Newest entries go at the top. Each entry: date, what was done, what was verified, what is next.
 
+## 2026-10-14 (overnight): showcase published, legal pages, marketing pack
+**Built**
+- **Showcase page, published privately on claude.ai:** https://claude.ai/artifact/VLYVz9jLuJ4ExR9CWAAE6V (code in `showcase/`). It has a free chart wheel that runs in the visitor's browser (12,325 cities built in, nothing sent or saved), real sample-book pages, a sample download and a "save as a story image" button for sharing. You choose who sees it with its Share menu. It can't take orders or sign-ups (claude.ai pages only store data for signed-in viewers), so the real site is still needed for selling.
+- **Legal (owner request):** Terms of Service, Privacy Policy, Refunds and right of withdrawal (with the EU model withdrawal form) and a Legal notice (Impressum) at `/terms`, `/privacy`, `/refunds` and `/legal-notice`. Your business details fill in from settings; until then the pages show a "Draft" banner. Checkout now requires a consent tick box (terms, immediate delivery, and the withdrawal right ending at download), which is recorded and shown on the Stripe receipt. The site sets no cookies any more, so no cookie banner is needed. `docs/legal/LEGAL_CHECKLIST.md` covers what pages can't: tax, registration, Stripe's restricted-business rules, data agreements and licences.
+- **Marketing:** `docs/MARKETING_CONTENT.md` (10 video scripts, Reddit posts, 10 Pinterest pins, 3 emails for people who reserved, messages for friends and creators) and `docs/BRAND_NAMES.md` (10 screened names; top picks Skyprint and Born Beneath).
+- Search-engine basics (robots.txt, sitemap, product data) and `docs/OWNER_DECISIONS.md`.
+
+**Verified**
+- Browser chart maths vs. the Swiss Ephemeris: 60 random births, worst error 0.31 arcminutes; retrograde flags agree in all 600 checks; time zones identical to the Python version on 10 historical and daylight-saving cases.
+- 61 automated tests pass, including in a fresh copy of the repo following the README steps exactly.
+- A code review of the night's work found 10 issues, all fixed. Showcase checked on desktop and phone; share image and sample download exercised with a stand-in download feature.
+
+**NOT verified**
+- The legal texts are drafts written from general knowledge, not legal advice; a lawyer should review them (the facts to check are listed in the checklist).
+- Same as before: no real AI-written book, real payment or Docker build in this sandbox.
+
+**Next:** the decisions in `docs/OWNER_DECISIONS.md` (payment provider check, name, business and tax details), then deploy.
+
+## 2026-10-14: Milestones 2-5 done, website and launch plan ready
+**Built**
+- Chart wheel image (`wheel.py`), drawn with original line glyphs so it looks the same everywhere.
+- AI writer (`reading.py`): Claude writes 7 chapters from the chart facts only. Every paragraph must list the facts it uses; the code rejects unknown or missing citations, banned clichés and badly sized paragraphs, and asks for one rewrite. Instructions and facts are cached, so a whole book costs roughly $0.30-0.80.
+- PDF book (`book.py`): 6x9 in, cover with the person's own wheel, gift dedication, chart page with positions table, a reading guide, 7 chapters, and a ✦ line under every paragraph naming the placements it's based on.
+- Sample book for a made-up person, "Maya" (`samples/maya.json` + `maya-sample.pdf`, 22 pages). I wrote it by hand in the same format and it passes the same automatic checks.
+- Website (`chartbook/web/`): landing page with the sample chapter, free chart preview, Stripe checkout, an order page that shows progress, PDF download, one-click "erase my data", automatic deletion after 30 days, a private stats page with visitors → previews → paid per marketing link, and a CSV of reserved-copy emails. Without a Stripe key it runs in "reserve a copy" mode (collects emails, takes no money), which suits the pre-sale test.
+- `make_book` command, Dockerfile, `docs/DEPLOY.md`, `docs/LAUNCH_PLAN.md`.
+- Optional review mode (`REVIEW_BOOKS=true`): you read and approve each book at `/admin/review` before the customer gets it, with a "rewrite" button. Failed books show on the stats page with a retry button.
+- Stripe receipts include the link to the customer's download page, so a closed tab doesn't lose the book (the site sends no email of its own yet).
+- AI cost is recorded per book and averaged on the stats page.
+- Books interrupted by a restart or deploy resume automatically when the server starts.
+- Marketing images in `marketing/` (3 Pinterest pins, 2 Instagram posts, link preview card), made from the sample book by `scripts/make_marketing_images.py`.
+- `scripts/check_writer.py`: once you have an API key, writes 3 test chapters for tricky charts (about $0.25) so you can check quality before launch.
+
+**Verified**
+- 44 automated tests pass (the PDF test needs Chromium): chart accuracy, writer validation and retry using a fake AI, the full paid flow using a fake Stripe (payment → writing → download → delete), webhook signature check, no double writing, purge rules, link tracking.
+- Accessibility: automated axe-core scan clean on all pages; contrast fixed (input borders, focus ring, wheel labels); keyboard order checked; no sideways scrolling at 320 px or 200% text.
+- A security review of the whole branch found no high-confidence issues. A code review found 10 bugs (e.g. a reservation could be erased mid-checkout, paid sales vanished from stats after deletion, rate limit broken behind a hosting proxy); all fixed with tests.
+
+**NOT verified (needs the owner's accounts or a normal network)**
+- A real Claude-written book: no API key in the build sandbox. The writer is tested with a fake.
+- Real Stripe payments: tested with a fake Stripe client only.
+- Place lookup by name (OpenStreetMap), because the sandbox blocks it.
+- Building the Docker image: no Docker engine in the sandbox. `requirements.txt` installs and the app starts in a fresh environment.
+
+**Decisions for the owner** (I picked placeholders; change any of them)
+1. Brand name: placeholder "Birth Sky Books". Check trademark, domain and social handles.
+2. Price: $29 placeholder (`PRICE_CENTS`).
+3. Refund policy: 14-day no-questions refund is promised on the site. Keep it?
+4. Swiss Ephemeris license (AGPL) vs. buying the professional license, before taking real money.
+5. Hosting provider, support email, Stripe and Anthropic accounts.
+
+**Next**: owner decisions above → deploy → place one real test order → start the launch plan.
+
+## 2026-10-13: Milestone 1 done (birth-chart calculator) + founder forecast
+- Built `chartbook/`, a Python birth-chart calculator using the Swiss Ephemeris (the standard planet-position library). From a birth date, time and place it works out the sign and degree of the Sun, Moon, planets and North Node, retrograde motion (when a planet appears to move backwards), the 12 houses (Placidus, switching to whole-sign near the poles), the Ascendant and Midheaven, and the major aspects (angles between planets).
+- Handles historical time zones and daylight saving, refuses birth times that didn't exist or happened twice when clocks changed, and supports an unknown birth time (houses are left out, with a note).
+- Verified with 10 automated tests (`pytest`), all passing. Einstein's chart matches the published reference values to the arcminute, and the Sun sits at exactly 0° Aries / 0° Cancer at the 2024 equinox and the 2025 solstice.
+- NOT verified: looking up places by name (OpenStreetMap). The build sandbox blocks that network call. Entering latitude and longitude directly works.
+- Wrote `docs/FORECAST.md`, the founder-style forecast. New risk found: the Swiss Ephemeris license (AGPL) means either publishing the site's code or buying a professional license. The owner has to decide.
+- Next: milestone 2, the chart wheel SVG image.
+
 ## 2026-10-13: Repo created
 - Created the repository with the project brief, instructions for Claude Code, and this log.
 - Nothing is built yet.
 - Next: milestone 1, a birth-chart calculator that works from date, time and place, with tests against a few known charts.
+
+## 2026-10-14 (late): first free marketing post
+- Posted launch post to r/SideProject: https://www.reddit.com/r/SideProject/comments/1x66rbc/ (links Payhip https://payhip.com/b/JaKLT).
+- Not possible yet: r/AppIdeas needs 50+ karma; Instagram API needs a Business/Creator account; YouTube upload can't be staged from the cloud sandbox (owner uploads the 3 videos from the phone).
+- Next: reply to Reddit comments, owner deploys the static site to Cloudflare Pages, more posts once karma grows.
+
+## 2026-10-15: price $8, site live
+- Price lowered to $8 across site, legal page, config, images and tests (61 pass). Payhip price must be changed by the owner.
+- Static site deployed to Cloudflare Pages (project `skyprint`): https://skyprint-2s1.pages.dev. Checked: all 13 assets return 200, 3 Payhip buy links, $8 shown, link-preview tags absolute.
+- Bundle source: marketing/skyprint-site.zip. Reddit post was spam-filtered (low karma); YouTube upload blocked by shared quota and owner asked not to use their Google/Discord accounts.
