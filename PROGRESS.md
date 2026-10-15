@@ -72,3 +72,8 @@ Newest entries go at the top. Each entry: date, what was done, what was verified
 - Posted launch post to r/SideProject: https://www.reddit.com/r/SideProject/comments/1x66rbc/ (links Payhip https://payhip.com/b/JaKLT).
 - Not possible yet: r/AppIdeas needs 50+ karma; Instagram API needs a Business/Creator account; YouTube upload can't be staged from the cloud sandbox (owner uploads the 3 videos from the phone).
 - Next: reply to Reddit comments, owner deploys the static site to Cloudflare Pages, more posts once karma grows.
+
+## 2026-10-15: price $8, site live
+- Price lowered to $8 across site, legal page, config, images and tests (61 pass). Payhip price must be changed by the owner.
+- Static site deployed to Cloudflare Pages (project `skyprint`): https://skyprint-2s1.pages.dev. Checked: all 13 assets return 200, 3 Payhip buy links, $8 shown, link-preview tags absolute.
+- Bundle source: marketing/skyprint-site.zip. Reddit post was spam-filtered (low karma); YouTube upload blocked by shared quota and owner asked not to use their Google/Discord accounts.
